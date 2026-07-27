@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector-IA - Comprensión Lectora Adaptativa</title>
+    <!-- Tailwind CSS desde CDN para diseño moderno y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons para iconografía clara -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        },
+                        accent: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glossary-word {
+            border-bottom: 2px dashed #0284c7;
+            color: #0369a1;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0 4px;
+            border-radius: 4px;
+            background-color: #e0f2fe;
+            transition: background 0.2s;
+        }
+        .glossary-word:hover {
+            background-color: #bae6fd;
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+        .spinner-dark {
+            border: 3px solid rgba(2, 132, 199, 0.2);
+            border-top-color: #0284c7;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col font-sans">
+
+    <!-- BARRA SUPERIOR DE NAVEGACIÓN Y ESTADÍSTICAS -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo y Nombre de la App -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('view-dashboard')">
+                <div id="header-avatar-display" class="bg-brand-500 text-white w-10 h-10 rounded-xl shadow-md flex items-center justify-center text-xl overflow-hidden shrink-0">
+                    <i data-lucide="book-open-check" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-900">Lector-IA</h1>
+                    <p class="text-xs text-slate-500" id="profile-name-display">Configurar perfil</p>
+                </div>
+            </div>
+
+            <!-- Navegación entre pestañas -->
+            <nav class="hidden md:flex items-center space-x-1">
+                <button onclick="switchView('view-dashboard')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Misiones</button>
+                <button onclick="switchView('view-progress')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Progreso</button>
+                <button onclick="switchView('view-profile')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Perfil</button>
+            </nav>
+
+            <!-- Indicadores de Gamificación -->
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-1 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full text-amber-700 font-bold text-xs">
+                    <i data-lucide="flame" class="w-4 h-4 text-amber-500 fill-amber-500"></i>
+                    <span id="streak-counter">0 días</span>
+                </div>
+                <div class="flex items-center space-x-1 bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-full text-sky-700 font-bold text-xs">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-sky-500"></i>
+                    <span id="xp-counter">0 XP</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL MULTI-VISTA (SPA) -->
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6">
+
+        <!-- MENSAJE DE ESTADO O ERROR GLOBAL -->
+        <div id="status-modal" class="hidden mb-4 p-4 rounded-xl border bg-amber-50 border-amber-200 text-amber-800 text-xs flex items-center justify-between shadow-sm">
+            <span id="status-modal-text">Cargando...</span>
+            <button onclick="hideStatusModal()" class="font-bold underline ml-2">Cerrar</button>
+        </div>
+
+        <!-- MODAL DE CONFIRMACIÓN DE REINICIO -->
+        <div id="confirm-reset-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl text-center space-y-4">
+                <div class="p-3 bg-rose-100 text-rose-600 rounded-full inline-block">
+                    <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">¿Reiniciar todos los datos?</h3>
+                <p class="text-xs text-slate-600">Se borrarán las lecturas completadas, los puntos XP y el perfil actual de este dispositivo.</p>
+                <div class="flex space-x-3 pt-2">
+                    <button onclick="closeResetModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-xs">Cancelar</button>
+                    <button onclick="executeResetData()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-xl text-xs">Sí, borrar todo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 1: CONFIGURACIÓN DE PERFIL INICIAL Y CÓDIGO DE RECUPERACIÓN -->
+        <section id="view-profile" class="space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 max-w-2xl mx-auto shadow-sm">
+                <div class="text-center space-y-2 mb-6">
+                    <div class="inline-flex bg-brand-50 text-brand-600 p-3 rounded-2xl mb-1">
+                        <i data-lucide="user-check" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">Perfil del Estudiante</h2>
+                    <p class="text-sm text-slate-600">Configura el perfil de Lector-IA o restaura un perfil guardado.</p>
+                </div>
+
+                <!-- BLOQUE DESTACADO: CARGAR CÓDIGO DE PROGRESO -->
+                <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 mb-6">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i data-lucide="key-round" class="w-4 h-4 text-brand-600"></i>
+                        <h3 class="font-bold text-xs text-brand-900 uppercase tracking-wider">Cargar Progreso con Código</h3>
+                    </div>
+                    <p class="text-xs text-slate-600 mb-3">Si estás usando Google Sites o cambiaste de dispositivo, pega aquí tu código guardado para restaurar todo tu nivel y avance:</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="import-code-input" placeholder="Pega tu código aquí (ej: eyJuYW1l...)" class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+                        <button type="button" onclick="importStudentCode()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">
+                            Cargar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <!-- Selector de Avatar del Estudiante -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Avatar o Foto de Perfil</label>
+                        <div class="flex items-center space-x-4 mb-3">
+                            <div id="avatar-preview-box" class="w-16 h-16 rounded-2xl bg-brand-100 border-2 border-brand-500 flex items-center justify-center text-3xl overflow-hidden shadow-sm shrink-0">
+                                🚀
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-slate-600 mb-2">Elige un avatar divertido o sube tu propia foto:</p>
+                                <label class="inline-flex items-center space-x-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer transition">
+                                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                                    <span>Subir imagen propia</span>
+                                    <input type="file" id="custom-avatar-input" accept="image/*" class="hidden" onchange="handleCustomAvatarUpload(event)">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-8 gap-2" id="avatar-presets-container">
+                            <button type="button" onclick="selectPresetAvatar('🚀')" class="avatar-preset-btn p-2 rounded-xl border-2 border-brand-500 bg-brand-50 text-xl hover:scale-105 transition">🚀</button>
+                            <button type="button" onclick="selectPresetAvatar('🔍')" class="avatar-preset-btn p-2 rounded-xl border border-slate-200 text-xl hover:scale-105 transition">🔍</button>
+                            <button type="button" onclick="selectPresetAvatar('👾')" class="avatar-preset-btn p-2 rounded-xl border border-slate-200 text-xl hover:scale-105 transition">👾</button>
+                            <button type="button" onclick="selectPresetAvatar('🤖')" class="avatar-preset-btn p-2 rounded-xl border border-slate-200 text-xl hover:scale-105 transition">🤖</button>
+                            <button type="button" onclick="selectPresetAvatar('🦁')" class="avatar-preset-btn p-2 rounded-xl border border-slate-200 text-xl hover:scale-105 transition">🦁</button>
+                            <button type="button" onclick="selectPresetAvatar('🧙‍♂️')" class="avatar-preset-btn p-2 rounded-xl border border-slate-200 text-xl hover:scale-105 transition">🧙‍♂️</button>
+                            <button type="button" onclick="selectPresetAvatar('🎨')" class="avatar-preset-btn p-2 rounded-xl border border-slate-200 text-xl hover:scale-105 transition">🎨</button>
+                            <button type="button" onclick="selectPresetAvatar('⚽')" class="avatar-preset-btn p-2 rounded-xl border border-slate-200 text-xl hover:scale-105 transition">⚽</button>
+                        </div>
+                    </div>
+
+                    <!-- Nombre del Estudiante -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nombre del Estudiante</label>
+                        <input type="text" id="student-name-input" placeholder="Ej: Lucas" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none">
+                    </div>
+
+                    <!-- Temas de Interés -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">¿Qué temas le interesan más? (Elige al menos uno)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <button type="button" onclick="toggleInterest(this, 'Ciencia y Espacio')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🚀 Ciencia y Espacio</button>
+                            <button type="button" onclick="toggleInterest(this, 'Misterio y Detectives')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🔍 Misterio</button>
+                            <button type="button" onclick="toggleInterest(this, 'Deportes y Aventuras')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">⚽ Deportes</button>
+                            <button type="button" onclick="toggleInterest(this, 'Videojuegos y Tecnología')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🎮 Videojuegos</button>
+                            <button type="button" onclick="toggleInterest(this, 'Animales y Naturaleza')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🌿 Naturaleza</button>
+                            <button type="button" onclick="toggleInterest(this, 'Historia y Leyendas')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🏰 Historia</button>
+                        </div>
+                    </div>
+
+                    <!-- Configuración opcional de Clave API Gemini -->
+                    <div class="border-t border-slate-200 pt-4 mt-2">
+                        <details class="group" open>
+                            <summary class="flex justify-between items-center font-bold text-xs text-slate-700 cursor-pointer list-none select-none">
+                                <span>🔑 Clave API Gemini (Para IA en vivo en web pública)</span>
+                                <span class="transition group-open:rotate-180">▼</span>
+                            </summary>
+                            <div class="mt-3 space-y-2">
+                                <p class="text-xs text-slate-500">
+                                    Pega tu clave de Google AI Studio. Se guardará al hacer clic en "Guardar Perfil".
+                                </p>
+                                <div class="flex space-x-2">
+                                    <input type="password" id="api-key-input" placeholder="AIzaSy..." class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500">
+                                    <button type="button" onclick="saveApiKey()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition">
+                                        Guardar
+                                    </button>
+                                </div>
+                                <p id="api-key-status" class="text-xs text-emerald-600 font-semibold hidden">✓ Clave guardada</p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- BLOQUE DE EXPORTACIÓN DEL CÓDIGO DE PROGRESO -->
+                    <div id="export-code-container" class="border-t border-slate-200 pt-4 hidden">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tu Código de Progreso Personal</label>
+                        <p class="text-xs text-slate-500 mb-2">Copia este código y guárdalo. Si entras desde otro navegador o se borra tu sesión, podrás restaurar tu avance exacto:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="export-code-display" readonly class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs font-mono bg-slate-50 text-slate-700 outline-none select-all">
+                            <button type="button" onclick="copyStudentCode()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition flex items-center space-x-1">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                <span>Copiar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Botón de Guardado e Inicio -->
+                    <button onclick="saveProfile()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl shadow-md transition flex items-center justify-center space-x-2 text-sm">
+                        <span>Guardar Perfil y Comenzar</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- Reset de Datos -->
+                    <div id="reset-profile-container" class="hidden text-center pt-2">
+                        <button type="button" onclick="openResetModal()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold underline">
+                            Borrar datos guardados de este dispositivo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 2: EVALUACIÓN DIAGNÓSTICA INICIAL -->
+        <section id="view-diagnostic" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 max-w-2xl mx-auto shadow-sm">
+                <div class="flex items-center justify-between border-b pb-4 mb-4">
+                    <div>
+                        <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Evaluación de Entrada</span>
+                        <h2 class="text-xl font-bold text-slate-900" id="diag-step-title">Pregunta Diagnóstica 1 de 3</h2>
+                    </div>
+                    <span class="p-2 bg-brand-50 text-brand-600 rounded-xl">
+                        <i data-lucide="brain" class="w-5 h-5"></i>
+                    </span>
+                </div>
+
+                <div id="diag-question-container" class="space-y-4">
+                    <p class="text-slate-700 font-medium text-sm md:text-base" id="diag-question-text">Cargando pregunta...</p>
+                    <div id="diag-options-container" class="space-y-2.5">
+                        <!-- Opciones dinámicas -->
+                    </div>
+                </div>
+
+                <div id="diag-complete-box" class="hidden text-center space-y-4 py-4">
+                    <div class="inline-flex bg-emerald-100 text-emerald-600 p-4 rounded-full">
+                        <i data-lucide="award" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">¡Diagnóstico Completado!</h3>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto">Hemos determinado tu nivel inicial de lectura. Tus misiones adaptativas diarias están listas.</p>
+                    <button onclick="switchView('view-dashboard')" class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 rounded-xl text-sm transition">
+                        Ir al Panel de Misiones
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 3: DASHBOARD / PANEL PRINCIPAL -->
+        <section id="view-dashboard" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-brand-600 to-indigo-700 rounded-2xl p-6 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="space-y-2">
+                    <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full border border-white/20 inline-block">
+                        Motor Adaptativo Activo
+                    </span>
+                    <h2 class="text-2xl font-bold" id="welcome-message">¡Hola! Listo para tu lectura de hoy</h2>
+                    <p class="text-xs text-sky-100 max-w-lg leading-relaxed" id="adaptive-level-desc">
+                        Nivel de partida calibrado. El motor IA ajustará la extensión y complejidad de los textos según tu progreso.
+                    </p>
+                </div>
+                <button id="btn-generate-ai" onclick="generateAiStory()" class="bg-white text-brand-700 hover:bg-sky-50 font-bold px-5 py-3 rounded-xl shadow transition shrink-0 text-sm flex items-center space-x-2">
+                    <span id="btn-generate-spinner" class="spinner spinner-dark hidden"></span>
+                    <i id="btn-generate-icon" data-lucide="sparkles" class="w-4 h-4 text-brand-700"></i>
+                    <span id="btn-generate-text">Generar Nueva Lectura con IA</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-3">
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                        <i data-lucide="target" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Nivel Adaptativo</p>
+                        <p class="text-sm font-bold text-slate-800" id="adaptive-level-tag">Nivel 1: Iniciación</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-3">
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Lecturas Completadas</p>
+                        <p class="text-sm font-bold text-slate-800" id="readings-completed-count">0 lecturas</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-3">
+                    <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Precisión Global</p>
+                        <p class="text-sm font-bold text-slate-800" id="accuracy-rate-display">-- %</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 4: LECTOR INTERACTIVO Y CUESTIONARIO -->
+        <section id="view-reader" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- COLUMNA IZQUIERDA: LECTURA -->
+            <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4 border-b pb-3 border-slate-100 gap-2">
+                        <div>
+                            <span class="inline-block bg-indigo-50 text-indigo-600 text-xs font-semibold px-2.5 py-1 rounded-md mb-1" id="story-category-tag">
+                                Misión Adaptativa
+                            </span>
+                            <h2 class="text-xl md:text-2xl font-bold text-slate-900" id="story-title">Cargando lectura...</h2>
+                        </div>
+
+                        <div class="flex items-center space-x-1 bg-slate-50 p-1 rounded-lg border border-slate-200 shrink-0">
+                            <select id="voice-select" onchange="onVoiceChange(this.value)" class="text-xs bg-white border border-slate-200 rounded px-1.5 py-1 text-slate-700 outline-none max-w-[110px] md:max-w-[150px] truncate" title="Seleccionar voz en castellano">
+                                <option value="0">Voz España</option>
+                            </select>
+                            <button id="btn-audio" onclick="toggleAudioReading()" title="Escuchar lectura" class="p-1.5 text-slate-600 hover:text-brand-600 hover:bg-white rounded transition">
+                                <i data-lucide="volume-2" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="changeFontSize(-1)" title="Reducir letra" class="p-1.5 text-slate-600 hover:text-brand-600 hover:bg-white rounded font-bold text-xs">
+                                A-
+                            </button>
+                            <button onclick="changeFontSize(1)" title="Aumentar letra" class="p-1.5 text-slate-600 hover:text-brand-600 hover:bg-white rounded font-bold text-xs">
+                                A+
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="reading-content" class="text-slate-700 text-base leading-relaxed space-y-4">
+                        <p class="text-slate-400 italic">Generando historia personalizada con Inteligencia Artificial...</p>
+                    </div>
+                </div>
+
+                <div id="vocabulary-box" class="mt-6 bg-sky-50 border border-sky-200 rounded-xl p-3.5 hidden">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="book-open" class="w-4 h-4 text-sky-600"></i>
+                            <h4 id="vocab-title" class="font-bold text-sky-900 text-sm">Glosario</h4>
+                        </div>
+                        <button onclick="closeVocabulary()" class="text-sky-500 hover:text-sky-800">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <p id="vocab-desc" class="text-xs text-sky-800 mt-1">Haz clic en las palabras destacadas para ver su significado.</p>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: CUESTIONARIO ADAPTATIVO -->
+            <div class="lg:col-span-5 flex flex-col space-y-4">
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-semibold text-slate-500">PROGRESO DE LA MISIÓN</span>
+                        <span id="step-indicator" class="text-xs font-bold text-brand-600">Pregunta 1 de 3</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-brand-500 h-full w-1/3 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <div id="quiz-card" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 flex-1 flex flex-col justify-between card-transition">
+
+                    <!-- PASO 1: LITERAL -->
+                    <div id="question-step-1" class="space-y-4">
+                        <div class="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-md">
+                            <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                            <span>Nivel 1: Comprensión Literal</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base" id="q1-title">
+                            Pregunta literal cargando...
+                        </h3>
+                        <div class="space-y-2 mt-3" id="q1-options-container">
+                            <!-- Opciones -->
+                        </div>
+                    </div>
+
+                    <!-- PASO 2: INFERENCIAL -->
+                    <div id="question-step-2" class="space-y-4 hidden">
+                        <div class="inline-flex items-center space-x-1.5 bg-amber-50 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-md">
+                            <i data-lucide="brain-circuit" class="w-3.5 h-3.5"></i>
+                            <span>Nivel 2: Comprensión Inferencial</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base" id="q2-title">
+                            Pregunta inferencial cargando...
+                        </h3>
+                        <div class="space-y-2 mt-3" id="q2-options-container">
+                            <!-- Opciones -->
+                        </div>
+                    </div>
+
+                    <!-- PASO 3: CRÍTICA -->
+                    <div id="question-step-3" class="space-y-4 hidden">
+                        <div class="inline-flex items-center space-x-1.5 bg-purple-50 text-purple-700 text-xs font-bold px-2.5 py-1 rounded-md">
+                            <i data-lucide="message-square-quote" class="w-3.5 h-3.5"></i>
+                            <span>Nivel 3: Reflexión Crítica</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base" id="q3-title">
+                            Pregunta reflexiva cargando...
+                        </h3>
+                        <p class="text-xs text-slate-500" id="q3-guidance">Escribe tu opinión justificada.</p>
+                        <textarea id="open-response" rows="3" placeholder="Escribe tu opinión argumentada..." class="w-full p-3 rounded-xl border border-slate-300 text-xs text-slate-800 outline-none resize-none"></textarea>
+                        
+                        <button id="btn-eval-critical" onclick="evaluateCriticalResponseWithAi()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center space-x-2">
+                            <span id="btn-eval-spinner" class="spinner hidden"></span>
+                            <i id="btn-eval-icon" data-lucide="sparkles" class="w-4 h-4"></i>
+                            <span id="btn-eval-text">Evaluar con IA</span>
+                        </button>
+                    </div>
+
+                    <!-- RETROALIMENTACIÓN -->
+                    <div id="feedback-box" class="mt-4 p-3.5 rounded-xl hidden border">
+                        <div class="flex items-start space-x-2.5">
+                            <div id="feedback-icon" class="p-1 rounded-lg shrink-0 mt-0.5"></div>
+                            <div>
+                                <h4 id="feedback-title" class="font-bold text-xs"></h4>
+                                <p id="vocab-explanation" class="text-xs mt-0.5 leading-normal"></p>
+                            </div>
+                        </div>
+                        <button id="btn-next-step" onclick="nextStep()" class="mt-3 w-full bg-slate-900 text-white font-semibold py-2 rounded-lg text-xs hover:bg-slate-800 transition">
+                            Siguiente Pregunta
+                        </button>
+                    </div>
+
+                    <!-- RESUMEN FINAL -->
+                    <div id="summary-card" class="text-center py-4 space-y-3 hidden">
+                        <div class="inline-flex bg-amber-100 text-amber-600 p-3 rounded-full">
+                            <i data-lucide="trophy" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900">¡Misión Cumplida!</h3>
+                        <p class="text-xs text-slate-600" id="summary-adaptive-feedback">Has completado el ciclo de lectura adaptativa.</p>
+                        <button onclick="switchView('view-dashboard')" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-slate-800 transition">
+                            Volver al Panel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 5: PANEL DE PROGRESO -->
+        <section id="view-progress" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Progreso por Dimensiones de Comprensión</h2>
+                        <p class="text-xs text-slate-500">Métricas analíticas basadas en el desempeño continuo</p>
+                    </div>
+                    <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                        <i data-lucide="line-chart" class="w-5 h-5"></i>
+                    </span>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-emerald-700">Nivel 1: Comprensión Literal</span>
+                            <span class="text-slate-600" id="prog-literal-val">0 %</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div id="prog-literal-bar" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-amber-700">Nivel 2: Comprensión Inferencial</span>
+                            <span class="text-slate-600" id="prog-inferential-val">0 %</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div id="prog-inferential-bar" class="bg-amber-500 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-purple-700">Nivel 3: Reflexión Crítica</span>
+                            <span class="text-slate-600" id="prog-critical-val">0 %</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div id="prog-critical-bar" class="bg-purple-500 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 px-4 text-center text-xs text-slate-500">
+        <p><b>Lector-IA</b> • Comprensión Lectora Adaptativa con Inteligencia Artificial</p>
+    </footer>
+
+    <!-- LÓGICA INTERACTIVA EN JAVASCRIPT -->
+    <script>
+        // CONFIGURACIÓN Y ESTADO DE LA APLICACIÓN
+        let apiKey = "";
+
+        let studentState = {
+            name: '',
+            avatar: '🚀',
+            avatarType: 'emoji',
+            interests: [],
+            level: 1,
+            diagnosticCompleted: false,
+            readingsCompleted: 0,
+            stats: {
+                literalTotal: 0, literalCorrect: 0,
+                inferentialTotal: 0, inferentialCorrect: 0,
+                criticalTotal: 0, criticalCorrect: 0
+            }
+        };
+
+        let currentStep = 1;
+        let xp = 0;
+        let streak = 0;
+        let fontSize = 16;
+        let isSpeaking = false;
+        let voices = [];
+        let selectedVoiceIndex = 0;
+        let currentReadingData = null;
+        let currentStepScores = { q1: false, q2: false, q3: false };
+
+        // BANCO DE HISTORIAS LOCALES DE RESPALDO (ROTATIVO)
+        const localStoryBank = [
+            {
+                title: "El misterio de la señal 42",
+                category: "Ciencia y Misterio",
+                isAiGenerated: false,
+                content: "Valeria tenía once años y una curiosidad insaciable. Una noche, los altavoces de su equipo emitieron un pitido en la **frecuencia** del canal 42: Bip... bip... bip. No era la estática habitual. La señal provenía directamente de una alta **órbita** terrestre.\n\nLejos de asustarse, anotó los intervalos en su libreta. Comprendió que no era un mensaje alienígena, sino la **telemetría** de emergencia del viejo satélite Astro-1. Grabar aquel momento fue como capturar el último suspiro de un explorador espacial.",
+                glossary: [
+                    { word: "frecuencia", definition: "Canal específico del espectro por el cual se transmite una señal de radio." },
+                    { word: "órbita", definition: "Trayectoria curva que sigue un objeto alrededor de un planeta." },
+                    { word: "telemetría", definition: "Sistema automático que mide y envía datos a distancia." }
+                ],
+                questionLiteral: {
+                    question: "¿En qué canal de radio escuchó Valeria la extraña señal?",
+                    options: ["A) En el canal 12", "B) En el canal 42", "C) En la frecuencia 100"],
+                    correctOption: "B",
+                    explanation: "En el primer párrafo se especifica que el pitido sonó en el canal 42."
+                },
+                questionInferential: {
+                    question: "¿Cómo demostró Valeria su actitud científica frente al fenómeno?",
+                    options: ["A) Asustándose y apagando la radio", "B) Anotando los intervalos de tiempo para buscar un patrón", "C) Llamando a la policía de inmediato"],
+                    correctOption: "B",
+                    explanation: "Al analizar los patrones con datos objetivos en su libreta, actuó de forma metódica."
+                },
+                questionCritical: {
+                    question: "Si descubrieras una señal desconocida en tu casa, ¿qué harías primero y por qué?",
+                    guidance: "Explica a quién acudirías o qué instrumento usarías para comprobarlo."
+                }
+            },
+            {
+                title: "El código del mapa antiguo",
+                category: "Misterio y Leyendas",
+                isAiGenerated: false,
+                content: "Durante una tarde lluviosa, Mateo encontró un viejo libro de historia en la biblioteca de su abuelo. Al abrirlo, cayó una hoja amarillenta grabada en **obsidiana** y cuero con símbolos extraños.\n\nMateo dedujo que era una **criptografía** utilizada por navegantes del siglo XVIII. Tras usar una **lupa** para examinar los detalles, descubrió las coordenadas de un baúl enterrado en el jardín. Aquella aventura le demostró que los libros guardan secretos que esperan a ser leídos.",
+                glossary: [
+                    { word: "obsidiana", definition: "Roca volcánica de color oscuro y brillo intenso." },
+                    { word: "criptografía", definition: "Arte de escribir mensajes con claves secretas para que solo los destinatarios puedan entenderlos." },
+                    { word: "lupa", definition: "Lente de aumento que permite ver detalles pequeños." }
+                ],
+                questionLiteral: {
+                    question: "¿Dónde encontró Mateo la hoja amarillenta con símbolos?",
+                    options: ["A) Dentro de un viejo libro de historia", "B) En el desván de su colegio", "C) En una caja metálica"],
+                    correctOption: "A",
+                    explanation: "El texto relata que el documento cayó al abrir un libro en la biblioteca del abuelo."
+                },
+                questionInferential: {
+                    question: "¿Qué cualidad fue fundamental en Mateo para resolver el enigma del mapa?",
+                    options: ["A) Su rapidez física al correr", "B) Su paciencia para analizar la criptografía del papel", "C) Su fuerza para mover muebles"],
+                    correctOption: "B",
+                    explanation: "La historia muestra que Mateo se detuvo a descifrar los símbolos minuciosamente."
+                },
+                questionCritical: {
+                    question: "¿Crees que los libros físicos tienen ventajas sobre las pantallas digitales? Argumenta tu respuesta.",
+                    guidance: "Menciona aspectos como la sensación de tocar el papel o la falta de distracciones."
+                }
+            },
+            {
+                title: "El robot del torneo de ajedrez",
+                category: "Videojuegos y Tecnología",
+                isAiGenerated: false,
+                content: "Sofía diseñó un pequeño robot equipado con un **algoritmo** de decisión para competir en el torneo local de ajedrez. Su autómata evaluaba miles de **movimientos** por segundo.\n\nDurante la partida final contra el campeón del colegio, el robot hizo una jugada **inesperada** sacrificando su torre. Sofía comprendió que la programación creativa puede superar las estrategias convencionales.",
+                glossary: [
+                    { word: "algoritmo", definition: "Conjunto ordenado de instrucciones que permite resolver un problema." },
+                    { word: "movimientos", definition: "Acción de cambiar la posición de una pieza en el tablero." },
+                    { word: "inesperada", definition: "Que sucede sin haber sido previsto o anticipado." }
+                ],
+                questionLiteral: {
+                    question: "¿Qué pieza sacrificó el robot durante la partida final?",
+                    options: ["A) El peón", "B) La torre", "C) El caballo"],
+                    correctOption: "B",
+                    explanation: "El texto señala expresamente que el robot realizó una jugada sacrificando su torre."
+                },
+                questionInferential: {
+                    question: "¿Por qué sorprendió la estrategia del robot al campeón?",
+                    options: ["A) Porque el robot rompió las reglas del juego", "B) Porque aplicó una jugada creativa fuera de las estrategias convencionales", "C) Porque se apagó en mitad de la partida"],
+                    correctOption: "B",
+                    explanation: "Al salirse de las jugadas típicas mediante su algoritmo, descolocó al oponente."
+                },
+                questionCritical: {
+                    question: "¿Consideras que la inteligencia artificial puede reemplazar la creatividad humana en los juegos? Fundamenta tu postura.",
+                    guidance: "Reflexiona sobre si la intuición humana es igual o distinta al cálculo computacional."
+                }
+            }
+        ];
+
+        const diagQuestions = [
+            {
+                dim: 'Literal',
+                question: 'Si en un cuento leemos: "El perro azul guardaba la llave bajo la alfombra roja", ¿dónde estaba la llave?',
+                options: ['A) En el bolsillo del perro', 'B) Bajo la alfombra roja', 'C) Detrás de la puerta'],
+                correct: 'B'
+            },
+            {
+                dim: 'Inferencial',
+                question: 'Si leemos: "Lucía se puso el abrigo, cogió el paraguas y escuchó el retumbar de los truenos", ¿qué está pasando?',
+                options: ['A) Hace mucho calor en la playa', 'B) Va a empezar una tormenta', 'C) Es de noche y va a dormir'],
+                correct: 'B'
+            },
+            {
+                dim: 'Crítica',
+                question: '¿Por qué es importante escuchar las opiniones de los demás aunque sean diferentes a las tuyas?',
+                options: ['A) Porque ayuda a aprender y comprender otros puntos de vista', 'B) No es importante, solo importa lo que yo piense', 'C) Porque así terminamos la tarea más rápido sin pensar'],
+                correct: 'A'
+            }
+        ];
+        let currentDiagIndex = 0;
+
+        function saveStudentData() {
+            try {
+                const dataToSave = { studentState: studentState, xp: xp, streak: streak };
+                localStorage.setItem('lectoria_student_data', JSON.stringify(dataToSave));
+                sessionStorage.setItem('lectoria_student_data', JSON.stringify(dataToSave));
+                generateAndDisplayStudentCode();
+            } catch (e) {
+                console.warn("Error guardando datos:", e);
+            }
+        }
+
+        function loadStudentData() {
+            try {
+                let saved = localStorage.getItem('lectoria_student_data');
+                if (!saved) saved = sessionStorage.getItem('lectoria_student_data');
+                
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.studentState) studentState = parsed.studentState;
+                    if (parsed.xp !== undefined) xp = parsed.xp;
+                    if (parsed.streak !== undefined) streak = parsed.streak;
+                    return true;
+                }
+            } catch (e) {
+                console.warn("Error cargando datos:", e);
+            }
+            return false;
+        }
+
+        function generateAndDisplayStudentCode() {
+            try {
+                const payload = { studentState, xp, streak, apiKey: getApiKey() };
+                const jsonStr = JSON.stringify(payload);
+                const code = btoa(encodeURIComponent(jsonStr));
+                
+                const codeDisplay = document.getElementById('export-code-display');
+                const codeBox = document.getElementById('export-code-container');
+                if (codeDisplay && codeBox) {
+                    codeDisplay.value = code;
+                    codeBox.classList.remove('hidden');
+                }
+            } catch (e) {
+                console.warn("Error generando código:", e);
+            }
+        }
+
+        function copyStudentCode() {
+            const input = document.getElementById('export-code-display');
+            if (!input || !input.value) return;
+
+            input.select();
+            input.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                showStatusModal('✓ ¡Código de progreso copiado al portapapeles! Guárdalo para restaurar tu avance.', false);
+            } catch (err) {
+                showStatusModal('Selecciona el texto del código y cópialo manualmente.', true);
+            }
+        }
+
+        function importStudentCode() {
+            const input = document.getElementById('import-code-input');
+            if (!input) return;
+
+            const code = input.value.trim();
+            if (!code) {
+                showStatusModal('Por favor pega un código de progreso válido.', true);
+                return;
+            }
+
+            try {
+                const jsonStr = decodeURIComponent(atob(code));
+                const parsed = JSON.parse(jsonStr);
+
+                if (parsed.studentState && parsed.studentState.name) {
+                    studentState = parsed.studentState;
+                    if (parsed.xp !== undefined) xp = parsed.xp;
+                    if (parsed.streak !== undefined) streak = parsed.streak;
+                    if (parsed.apiKey) {
+                        localStorage.setItem('lectoria_api_key', parsed.apiKey);
+                        apiKey = parsed.apiKey;
+                    }
+
+                    saveStudentData();
+                    showStatusModal(`¡Progreso restaurado con éxito! Bienvenido de nuevo, ${studentState.name}.`, false);
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    throw new Error('Formato inválido');
+                }
+            } catch (e) {
+                showStatusModal('El código introducido no es válido o está incompleto.', true);
+            }
+        }
+
+        function openResetModal() {
+            document.getElementById('confirm-reset-modal')?.classList.remove('hidden');
+            initIcons();
+        }
+
+        function closeResetModal() {
+            document.getElementById('confirm-reset-modal')?.classList.add('hidden');
+        }
+
+        function executeResetData() {
+            closeResetModal();
+            try {
+                localStorage.removeItem('lectoria_student_data');
+                sessionStorage.removeItem('lectoria_student_data');
+            } catch (e) {}
+            location.reload();
+        }
+
+        function switchView(viewId) {
+            const views = ['view-profile', 'view-diagnostic', 'view-dashboard', 'view-reader', 'view-progress'];
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(viewId);
+            if (target) target.classList.remove('hidden');
+            initIcons();
+        }
+
+        function updateAvatarPreviews() {
+            const previewBox = document.getElementById('avatar-preview-box');
+            const headerDisplay = document.getElementById('header-avatar-display');
+
+            if (!previewBox || !headerDisplay) return;
+
+            if (studentState.avatarType === 'image' && studentState.avatar) {
+                previewBox.innerHTML = `<img src="${studentState.avatar}" alt="Avatar" class="w-full h-full object-cover">`;
+                headerDisplay.innerHTML = `<img src="${studentState.avatar}" alt="Avatar" class="w-full h-full object-cover">`;
+            } else {
+                const emoji = studentState.avatar || '🚀';
+                previewBox.innerHTML = `<span class="text-3xl">${emoji}</span>`;
+                headerDisplay.innerHTML = `<span class="text-xl">${emoji}</span>`;
+            }
+        }
+
+        function selectPresetAvatar(emoji) {
+            studentState.avatar = emoji;
+            studentState.avatarType = 'emoji';
+            updateAvatarPreviews();
+            saveStudentData();
+            playSound('pop');
+        }
+
+        function handleCustomAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                showStatusModal('La imagen debe ser menor a 2MB.', true);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                studentState.avatar = e.target.result;
+                studentState.avatarType = 'image';
+                updateAvatarPreviews();
+                saveStudentData();
+                playSound('pop');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function toggleInterest(btn, interest) {
+            const idx = studentState.interests.indexOf(interest);
+            if (idx === -1) {
+                studentState.interests.push(interest);
+                btn.classList.add('bg-brand-500', 'text-white', 'border-brand-500');
+                btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+            } else {
+                studentState.interests.splice(idx, 1);
+                btn.classList.remove('bg-brand-500', 'text-white', 'border-brand-500');
+                btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+            }
+            saveStudentData();
+        }
+
+        function saveProfile() {
+            saveApiKey();
+
+            const nameInput = document.getElementById('student-name-input');
+            const name = nameInput ? nameInput.value.trim() : '';
+
+            if (!name) {
+                showStatusModal('Por favor escribe el nombre del estudiante para continuar.', true);
+                return;
+            }
+
+            studentState.name = name;
+            
+            const profileDisplay = document.getElementById('profile-name-display');
+            if (profileDisplay) profileDisplay.textContent = name;
+
+            const welcomeMsg = document.getElementById('welcome-message');
+            if (welcomeMsg) welcomeMsg.textContent = `¡Hola, ${name}! Listo para tu lectura de hoy`;
+
+            updateAvatarPreviews();
+            hideStatusModal();
+            saveStudentData();
+            playSound('pop');
+
+            if (!studentState.diagnosticCompleted) {
+                switchView('view-diagnostic');
+                startDiagnostic();
+            } else {
+                switchView('view-dashboard');
+            }
+        }
+
+        function startDiagnostic() {
+            currentDiagIndex = 0;
+            document.getElementById('diag-question-container')?.classList.remove('hidden');
+            document.getElementById('diag-complete-box')?.classList.add('hidden');
+            renderDiagnosticStep();
+        }
+
+        function renderDiagnosticStep() {
+            const q = diagQuestions[currentDiagIndex];
+            if (!q) return;
+
+            const stepTitle = document.getElementById('diag-step-title');
+            if (stepTitle) stepTitle.textContent = `Pregunta ${currentDiagIndex + 1} de ${diagQuestions.length} (${q.dim})`;
+
+            const qText = document.getElementById('diag-question-text');
+            if (qText) qText.textContent = q.question;
+
+            const optsContainer = document.getElementById('diag-options-container');
+            if (!optsContainer) return;
+            optsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50 transition text-sm font-medium text-slate-700';
+                btn.textContent = opt;
+                btn.onclick = () => submitDiagStep(idx);
+                optsContainer.appendChild(btn);
+            });
+            initIcons();
+        }
+
+        function submitDiagStep(selectedIdx) {
+            currentDiagIndex++;
+            playSound('pop');
+            if (currentDiagIndex >= diagQuestions.length) {
+                studentState.diagnosticCompleted = true;
+                studentState.level = 2;
+                xp += 50;
+
+                document.getElementById('xp-counter').textContent = xp + ' XP';
+                document.getElementById('diag-question-container')?.classList.add('hidden');
+                document.getElementById('diag-complete-box')?.classList.remove('hidden');
+
+                updateAdaptiveEngineState();
+                saveStudentData();
+                playSound('fanfare');
+            } else {
+                renderDiagnosticStep();
+            }
+            initIcons();
+        }
+
+        function getApiKey() {
+            return localStorage.getItem('lectoria_api_key') || apiKey || '';
+        }
+
+        function saveApiKey() {
+            const input = document.getElementById('api-key-input');
+            const status = document.getElementById('api-key-status');
+            if (input) {
+                const key = input.value.trim();
+                if (key) {
+                    localStorage.setItem('lectoria_api_key', key);
+                    apiKey = key;
+                    if (status) {
+                        status.textContent = '✓ Clave API activa y guardada';
+                        status.classList.remove('hidden');
+                    }
+                } else {
+                    localStorage.removeItem('lectoria_api_key');
+                    apiKey = "";
+                    if (status) {
+                        status.textContent = 'Motor local de historias activo';
+                        status.classList.remove('hidden');
+                    }
+                }
+            }
+        }
+
+        async function callGeminiApi(payload) {
+            const key = getApiKey();
+            if (!key) throw new Error('NO_API_KEY');
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error?.message || `HTTP ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        function generateLocalStory() {
+            const index = studentState.readingsCompleted % localStoryBank.length;
+            const template = localStoryBank[index] || localStoryBank[0];
+            const story = JSON.parse(JSON.stringify(template));
+            story.isAiGenerated = false;
+            return story;
+        }
+
+        async function generateAiStory() {
+            saveApiKey();
+
+            const btn = document.getElementById('btn-generate-ai');
+            const spinner = document.getElementById('btn-generate-spinner');
+            const icon = document.getElementById('btn-generate-icon');
+            const text = document.getElementById('btn-generate-text');
+
+            if (btn) btn.disabled = true;
+            if (spinner) spinner.classList.remove('hidden');
+            if (icon) icon.classList.add('hidden');
+            if (text) text.textContent = 'Preparando lectura...';
+
+            const activeKey = getApiKey();
+
+            if (activeKey) {
+                showStatusModal('Conectando con Gemini IA para redactar una historia a tu medida...', false);
+                const chosenInterests = studentState.interests.length > 0 ? studentState.interests.join(', ') : 'Misterio y Ciencia';
+
+                const levelSpecs = {
+                    1: 'Longitud de 120 a 150 palabras. Sintaxis sencilla, oraciones cortas.',
+                    2: 'Longitud de 180 a 220 palabras. Sintaxis combinada con causa y efecto.',
+                    3: 'Longitud de 250 a 300 palabras. Sintaxis rica con vocabulario desafiante.'
+                };
+
+                const userPrompt = `Crea una micro-lectura inédita e interactiva para un niño de 11 años llamado ${studentState.name || 'el estudiante'}.
+                Temas preferidos: ${chosenInterests}.
+                Nivel pedagógico: Nivel ${studentState.level} (${levelSpecs[studentState.level] || levelSpecs[1]}).
+                Asegúrate de envolver 3 o 4 palabras de vocabulario con asteriscos dobles como **ejemplo** en el contenido del texto.
+                Genera también una pregunta literal (con opción correcta 'A', 'B' o 'C'), una pregunta inferencial y una pregunta crítica de opinión.`;
+
+                const systemPrompt = `Eres un Pedagogo Especialista en Lectura Infantil y Escritor de Literatura Juvenil. Genera respuestas estrictamente en formato JSON válido. Es muy importante que en el texto de la historia encierres exactamente 3 o 4 palabras de vocabulario entre asteriscos dobles (ej: **telemetría**).`;
+
+                const storySchema = {
+                    type: "OBJECT",
+                    properties: {
+                        title: { type: "STRING" },
+                        category: { type: "STRING" },
+                        content: { type: "STRING" },
+                        glossary: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: { word: { type: "STRING" }, definition: { type: "STRING" } },
+                                required: ["word", "definition"]
+                            }
+                        },
+                        questionLiteral: {
+                            type: "OBJECT",
+                            properties: { question: { type: "STRING" }, options: { type: "ARRAY", items: { type: "STRING" } }, correctOption: { type: "STRING" }, explanation: { type: "STRING" } },
+                            required: ["question", "options", "correctOption", "explanation"]
+                        },
+                        questionInferential: {
+                            type: "OBJECT",
+                            properties: { question: { type: "STRING" }, options: { type: "ARRAY", items: { type: "STRING" } }, correctOption: { type: "STRING" }, explanation: { type: "STRING" } },
+                            required: ["question", "options", "correctOption", "explanation"]
+                        },
+                        questionCritical: {
+                            type: "OBJECT",
+                            properties: { question: { type: "STRING" }, guidance: { type: "STRING" } },
+                            required: ["question", "guidance"]
+                        }
+                    },
+                    required: ["title", "category", "content", "glossary", "questionLiteral", "questionInferential", "questionCritical"]
+                };
+
+                const payload = {
+                    contents: [{ parts: [{ text: userPrompt }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: { responseMimeType: "application/json", responseSchema: storySchema }
+                };
+
+                try {
+                    const apiResult = await callGeminiApi(payload);
+                    const rawJson = apiResult.candidates?.[0]?.content?.parts?.[0]?.text;
+                    currentReadingData = JSON.parse(rawJson);
+                    currentReadingData.isAiGenerated = true;
+                    
+                    renderStoryInReader(currentReadingData);
+                    switchView('view-reader');
+                    hideStatusModal();
+                    return;
+                } catch (error) {
+                    console.warn("Fallo en API Gemini, activando motor local:", error);
+                    showStatusModal(`Aviso API: ${error.message}. Activando motor de respaldo local.`, true);
+                } finally {
+                    if (btn) btn.disabled = false;
+                    if (spinner) spinner.classList.add('hidden');
+                    if (icon) icon.classList.remove('hidden');
+                    if (text) text.textContent = 'Generar Nueva Lectura con IA';
+                }
+            }
+
+            setTimeout(() => {
+                currentReadingData = generateLocalStory();
+                renderStoryInReader(currentReadingData);
+                switchView('view-reader');
+                hideStatusModal();
+                if (btn) btn.disabled = false;
+                if (spinner) spinner.classList.add('hidden');
+                if (icon) icon.classList.remove('hidden');
+                if (text) text.textContent = 'Generar Nueva Lectura con IA';
+            }, 300);
+        }
+
+        function renderStoryInReader(story) {
+            document.getElementById('story-title').textContent = story.title || 'Historia Adaptativa';
+            
+            const categoryTag = document.getElementById('story-category-tag');
+            if (categoryTag) {
+                const originLabel = story.isAiGenerated ? '✨ Gemini IA en vivo' : '📚 Motor Local';
+                categoryTag.textContent = `${story.category || 'Misión'} • ${originLabel}`;
+            }
+
+            currentReadingData.glossaryMap = {};
+            if (Array.isArray(story.glossary)) {
+                story.glossary.forEach(g => {
+                    if (g.word && g.definition) {
+                        const cleanKey = g.word.replace(/\*/g, '').trim().toLowerCase();
+                        currentReadingData.glossaryMap[cleanKey] = g.definition;
+                    }
+                });
+            }
+
+            let contentHtml = (story.content || '')
+                .replace(/\*\*(.*?)\*\*/g, (match, word) => {
+                    const cleanWord = word.trim();
+                    const lookupKey = cleanWord.toLowerCase();
+                    return `<span class="glossary-word" onclick="showVocabularyDirect('${lookupKey}', '${cleanWord}')">${cleanWord}</span>`;
+                });
+
+            const paragraphs = contentHtml.split('\n\n').filter(p => p.trim().length > 0);
+            document.getElementById('reading-content').innerHTML = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+
+            // Pregunta 1
+            document.getElementById('q1-title').textContent = story.questionLiteral.question;
+            const q1Opts = document.getElementById('q1-options-container');
+            q1Opts.innerHTML = '';
+            story.questionLiteral.options.forEach((opt, idx) => {
+                const letter = String.fromCharCode(65 + idx);
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-3 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50 transition text-xs font-medium text-slate-700';
+                btn.textContent = opt;
+                btn.onclick = () => selectOption(1, letter);
+                q1Opts.appendChild(btn);
+            });
+
+            // Pregunta 2
+            document.getElementById('q2-title').textContent = story.questionInferential.question;
+            const q2Opts = document.getElementById('q2-options-container');
+            q2Opts.innerHTML = '';
+            story.questionInferential.options.forEach((opt, idx) => {
+                const letter = String.fromCharCode(65 + idx);
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-3 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50 transition text-xs font-medium text-slate-700';
+                btn.textContent = opt;
+                btn.onclick = () => selectOption(2, letter);
+                q2Opts.appendChild(btn);
+            });
+
+            // Pregunta 3
+            document.getElementById('q3-title').textContent = story.questionCritical.question;
+            document.getElementById('q3-guidance').textContent = story.questionCritical.guidance || 'Escribe tu opinión justificada.';
+            document.getElementById('open-response').value = '';
+
+            currentStep = 1;
+            currentStepScores = { q1: false, q2: false, q3: false };
+            document.getElementById('summary-card')?.classList.add('hidden');
+            document.getElementById('question-step-1')?.classList.remove('hidden');
+            document.getElementById('question-step-2')?.classList.add('hidden');
+            document.getElementById('question-step-3')?.classList.add('hidden');
+            document.getElementById('step-indicator').textContent = 'Pregunta 1 de 3';
+            document.getElementById('progress-bar').style.width = '33%';
+            closeVocabulary();
+            initIcons();
+        }
+
+        async function evaluateCriticalResponseWithAi() {
+            const input = document.getElementById('open-response');
+            if (!input) return;
+            const studentText = input.value.trim();
+
+            if (studentText.length < 12) {
+                showFeedbackBox(false, 'Argumenta un poco más', 'Intenta responder con una frase completa explicando tus razones.');
+                playSound('error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-eval-critical');
+            const spinner = document.getElementById('btn-eval-spinner');
+            const icon = document.getElementById('btn-eval-icon');
+            const text = document.getElementById('btn-eval-text');
+
+            if (btn) btn.disabled = true;
+            if (spinner) spinner.classList.remove('hidden');
+            if (icon) icon.classList.add('hidden');
+            if (text) text.textContent = 'Analizando argumento con IA...';
+
+            const evalSchema = {
+                type: "OBJECT",
+                properties: {
+                    isValid: { type: "BOOLEAN" },
+                    title: { type: "STRING" },
+                    feedback: { type: "STRING" }
+                },
+                required: ["isValid", "title", "feedback"]
+            };
+
+            const userPrompt = `Evalúa la respuesta de 11 años (${studentState.name}). Pregunta: "${currentReadingData.questionCritical.question}". Respuesta: "${studentText}".`;
+            const systemPrompt = `Eres un tutor IA empático para niños de 11 años. Valora la argumentación. Devuelve JSON válido.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { responseMimeType: "application/json", responseSchema: evalSchema }
+            };
+
+            try {
+                const apiResult = await callGeminiApi(payload);
+                const resultObj = JSON.parse(apiResult.candidates?.[0]?.content?.parts?.[0]?.text);
+
+                currentStepScores.q3 = resultObj.isValid;
+                showFeedbackBox(resultObj.isValid, resultObj.title || '¡Buen trabajo reflexivo!', resultObj.feedback || 'Has expresado tus ideas con claridad.');
+                if (resultObj.isValid) playSound('success'); else playSound('error');
+
+                const btnNext = document.getElementById('btn-next-step');
+                if (btnNext) btnNext.textContent = 'Ver Resultado del Reto';
+            } catch (e) {
+                currentStepScores.q3 = true;
+                showFeedbackBox(true, '¡Opinión registrada con éxito!', 'Has argumentado tu postura expresando tus ideas claramente.');
+                playSound('success');
+            } finally {
+                if (btn) btn.disabled = false;
+                if (spinner) spinner.classList.add('hidden');
+                if (icon) icon.classList.remove('hidden');
+                if (text) text.textContent = 'Evaluar con IA';
+            }
+        }
+
+        function selectOption(step, option) {
+            if (!currentReadingData) return;
+
+            let isCorrect = false;
+            let explanation = '';
+
+            if (step === 1) {
+                const correct = currentReadingData.questionLiteral.correctOption.replace(/[^A-C]/g, '');
+                isCorrect = (option === correct);
+                explanation = currentReadingData.questionLiteral.explanation;
+                currentStepScores.q1 = isCorrect;
+            } else if (step === 2) {
+                const correct = currentReadingData.questionInferential.correctOption.replace(/[^A-C]/g, '');
+                isCorrect = (option === correct);
+                explanation = currentReadingData.questionInferential.explanation;
+                currentStepScores.q2 = isCorrect;
+            }
+
+            if (isCorrect) {
+                showFeedbackBox(true, '¡Excelente elección!', explanation || 'Has localizado la respuesta correcta.');
+                playSound('success');
+            } else {
+                showFeedbackBox(false, 'Pista para revisar:', explanation || 'Revisa la lectura para encontrar más pistas.');
+                playSound('error');
+            }
+        }
+
+        function showFeedbackBox(isSuccess, title, desc) {
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackDesc = document.getElementById('vocab-explanation');
+            const feedbackIcon = document.getElementById('feedback-icon');
+
+            if (!feedbackBox) return;
+            feedbackBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-rose-50', 'border-rose-200');
+
+            if (isSuccess) {
+                feedbackBox.classList.add('bg-emerald-50', 'border-emerald-200');
+                feedbackIcon.className = 'p-1.5 rounded-lg shrink-0 mt-0.5 bg-emerald-100 text-emerald-700';
+                feedbackIcon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
+                feedbackTitle.textContent = title;
+                feedbackTitle.className = 'font-bold text-sm text-emerald-900';
+                feedbackDesc.textContent = desc;
+                feedbackDesc.className = 'text-xs mt-1 text-emerald-800 leading-normal';
+            } else {
+                feedbackBox.classList.add('bg-rose-50', 'border-rose-200');
+                feedbackIcon.className = 'p-1.5 rounded-lg shrink-0 mt-0.5 bg-rose-100 text-rose-700';
+                feedbackIcon.innerHTML = '<i data-lucide="help-circle" class="w-5 h-5"></i>';
+                feedbackTitle.textContent = title;
+                feedbackTitle.className = 'font-bold text-sm text-rose-900';
+                feedbackDesc.textContent = desc;
+                feedbackDesc.className = 'text-xs mt-1 text-rose-800 leading-normal';
+            }
+            initIcons();
+        }
+
+        function nextStep() {
+            document.getElementById('feedback-box')?.classList.add('hidden');
+
+            if (currentStep === 1) {
+                document.getElementById('question-step-1')?.classList.add('hidden');
+                document.getElementById('question-step-2')?.classList.remove('hidden');
+                document.getElementById('step-indicator').textContent = 'Pregunta 2 de 3';
+                document.getElementById('progress-bar').style.width = '66%';
+                currentStep = 2;
+            } else if (currentStep === 2) {
+                document.getElementById('question-step-2')?.classList.add('hidden');
+                document.getElementById('question-step-3')?.classList.remove('hidden');
+                document.getElementById('step-indicator').textContent = 'Pregunta 3 de 3';
+                document.getElementById('progress-bar').style.width = '100%';
+                currentStep = 3;
+            } else if (currentStep === 3) {
+                document.getElementById('question-step-3')?.classList.add('hidden');
+                document.getElementById('summary-card')?.classList.remove('hidden');
+                document.getElementById('step-indicator').textContent = '¡Completado!';
+
+                studentState.readingsCompleted += 1;
+                studentState.stats.literalTotal += 1;
+                if (currentStepScores.q1) studentState.stats.literalCorrect += 1;
+
+                studentState.stats.inferentialTotal += 1;
+                if (currentStepScores.q2) studentState.stats.inferentialCorrect += 1;
+
+                studentState.stats.criticalTotal += 1;
+                if (currentStepScores.q3) studentState.stats.criticalCorrect += 1;
+
+                xp += 50;
+                streak = Math.max(1, streak + 1);
+
+                document.getElementById('xp-counter').textContent = xp + ' XP';
+                document.getElementById('streak-counter').textContent = streak + ' días';
+                document.getElementById('readings-completed-count').textContent = studentState.readingsCompleted + ' lecturas';
+
+                const totalQuestions = studentState.stats.literalTotal + studentState.stats.inferentialTotal + studentState.stats.criticalTotal;
+                const totalCorrect = studentState.stats.literalCorrect + studentState.stats.inferentialCorrect + studentState.stats.criticalCorrect;
+                const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+
+                document.getElementById('accuracy-rate-display').textContent = accuracy + ' %';
+
+                if (accuracy >= 80 && studentState.level < 3) {
+                    studentState.level += 1;
+                    document.getElementById('summary-adaptive-feedback').textContent = '¡Enhorabuena! Has subido al Nivel ' + studentState.level + ' gracias a tu alta precisión.';
+                } else {
+                    document.getElementById('summary-adaptive-feedback').textContent = 'Excelente trabajo manteniendo tu nivel adaptativo.';
+                }
+
+                updateAdaptiveEngineState();
+                updateProgressUI();
+                saveStudentData();
+                playSound('fanfare');
+            }
+        }
+
+        function showVocabularyDirect(lookupKey, originalWord) {
+            const vocabBox = document.getElementById('vocabulary-box');
+            const title = document.getElementById('vocab-title');
+            const desc = document.getElementById('vocab-desc');
+
+            if (!vocabBox || !title || !desc) return;
+
+            title.textContent = originalWord || lookupKey;
+
+            if (currentReadingData && currentReadingData.glossaryMap && currentReadingData.glossaryMap[lookupKey.toLowerCase()]) {
+                desc.textContent = currentReadingData.glossaryMap[lookupKey.toLowerCase()];
+            } else {
+                desc.textContent = 'Palabra clave destacada para ampliar tu vocabulario.';
+            }
+            vocabBox.classList.remove('hidden');
+            playSound('pop');
+        }
+
+        function closeVocabulary() {
+            document.getElementById('vocabulary-box')?.classList.add('hidden');
+        }
+
+        function initIcons() {
+            try {
+                if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+                    lucide.createIcons();
+                }
+            } catch (e) {
+                console.warn('Carga diferida de iconos:', e);
+            }
+        }
+
+        function showStatusModal(msg, isError) {
+            const modal = document.getElementById('status-modal');
+            const text = document.getElementById('status-modal-text');
+            if (modal && text) {
+                text.textContent = msg;
+                modal.className = `mb-4 p-4 rounded-xl border text-xs flex items-center justify-between ${isError ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-sky-50 border-sky-200 text-sky-800'}`;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function hideStatusModal() {
+            document.getElementById('status-modal')?.classList.add('hidden');
+        }
+
+        function updateAdaptiveEngineState() {
+            const lvlMap = { 1: 'Nivel 1: Iniciación', 2: 'Nivel 2: Explorador', 3: 'Nivel 3: Avanzado' };
+            const descMap = {
+                1: 'Lecturas breves (120-150 palabras), estructuras sencillas y apoyo directo.',
+                2: 'Lecturas medias (180-220 palabras), inferencias moderadas y vocabulario enriquecido.',
+                3: 'Lecturas avanzadas (250-300 palabras), ideas complejas y razonamiento crítico.'
+            };
+
+            const tag = document.getElementById('adaptive-level-tag');
+            const desc = document.getElementById('adaptive-level-desc');
+
+            if (tag) tag.textContent = lvlMap[studentState.level] || lvlMap[2];
+            if (desc) desc.textContent = descMap[studentState.level] || descMap[2];
+        }
+
+        function updateProgressUI() {
+            const s = studentState.stats;
+            const litPct = s.literalTotal > 0 ? Math.round((s.literalCorrect / s.literalTotal) * 100) : 0;
+            const infPct = s.inferentialTotal > 0 ? Math.round((s.inferentialCorrect / s.inferentialTotal) * 100) : 0;
+            const critPct = s.criticalTotal > 0 ? Math.round((s.criticalCorrect / s.criticalTotal) * 100) : 0;
+
+            document.getElementById('prog-literal-val').textContent = litPct + ' %';
+            document.getElementById('prog-literal-bar').style.width = litPct + '%';
+
+            document.getElementById('prog-inferential-val').textContent = infPct + ' %';
+            document.getElementById('prog-inferential-bar').style.width = infPct + '%';
+
+            document.getElementById('prog-critical-val').textContent = critPct + ' %';
+            document.getElementById('prog-critical-bar').style.width = critPct + '%';
+        }
+
+        function loadVoices() {
+            if (!('speechSynthesis' in window)) return;
+            const allVoices = window.speechSynthesis.getVoices();
+            voices = allVoices.filter(v => v.lang === 'es-ES' || v.lang.startsWith('es'));
+            if (voices.length === 0) voices = allVoices;
+
+            const select = document.getElementById('voice-select');
+            if (!select) return;
+            select.innerHTML = '';
+
+            voices.forEach((voice, idx) => {
+                const option = document.createElement('option');
+                option.value = idx;
+                let isSpain = voice.lang === 'es-ES' ? ' (España)' : '';
+                option.textContent = (voice.name || `Voz ${idx + 1}`) + isSpain;
+                if (voice.lang === 'es-ES' && selectedVoiceIndex === 0) {
+                    selectedVoiceIndex = idx;
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function onVoiceChange(idx) {
+            selectedVoiceIndex = parseInt(idx, 10);
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                toggleAudioReading();
+            }
+        }
+
+        function toggleAudioReading() {
+            const btn = document.getElementById('btn-audio');
+            if (!('speechSynthesis' in window)) return;
+
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                if (btn) {
+                    btn.classList.remove('bg-brand-500', 'text-white');
+                    btn.classList.add('text-slate-600');
+                }
+            } else {
+                const readingEl = document.getElementById('reading-content');
+                if (!readingEl) return;
+
+                const text = readingEl.innerText;
+                const utterance = new SpeechSynthesisUtterance(text);
+                if (voices[selectedVoiceIndex]) {
+                    utterance.voice = voices[selectedVoiceIndex];
+                }
+                utterance.lang = 'es-ES';
+                utterance.rate = 0.92;
+                utterance.pitch = 1.05;
+
+                utterance.onend = function() {
+                    isSpeaking = false;
+                    if (btn) {
+                        btn.classList.remove('bg-brand-500', 'text-white');
+                        btn.classList.add('text-slate-600');
+                    }
+                };
+
+                window.speechSynthesis.speak(utterance);
+                isSpeaking = true;
+                if (btn) {
+                    btn.classList.add('bg-brand-500', 'text-white');
+                    btn.classList.remove('text-slate-600');
+                }
+            }
+        }
+
+        function changeFontSize(delta) {
+            fontSize = Math.max(14, Math.min(24, fontSize + delta * 2));
+            const readingEl = document.getElementById('reading-content');
+            if (readingEl) readingEl.style.fontSize = fontSize + 'px';
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'pop') {
+                    osc.frequency.setValueAtTime(400, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.05);
+                } else if (type === 'success') {
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.2);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.15);
+                } else if (type === 'fanfare') {
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                }
+            } catch (e) {
+                // Audio no disponible
+            }
+        }
+
+        window.onload = function() {
+            initIcons();
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+                loadVoices();
+            }
+
+            const savedKey = localStorage.getItem('lectoria_api_key');
+            const keyInput = document.getElementById('api-key-input');
+            const keyStatus = document.getElementById('api-key-status');
+            if (savedKey && keyInput) {
+                keyInput.value = savedKey;
+                apiKey = savedKey;
+                if (keyStatus) {
+                    keyStatus.textContent = '✓ Clave API activa y guardada';
+                    keyStatus.classList.remove('hidden');
+                }
+            }
+
+            const hasData = loadStudentData();
+
+            if (hasData && studentState.name) {
+                const nameInput = document.getElementById('student-name-input');
+                if (nameInput) nameInput.value = studentState.name;
+
+                const profileDisplay = document.getElementById('profile-name-display');
+                if (profileDisplay) profileDisplay.textContent = studentState.name;
+
+                const welcomeMsg = document.getElementById('welcome-message');
+                if (welcomeMsg) welcomeMsg.textContent = `¡Hola, ${studentState.name}! Listo para tu lectura de hoy`;
+
+                const xpCounter = document.getElementById('xp-counter');
+                if (xpCounter) xpCounter.textContent = xp + ' XP';
+
+                const streakCounter = document.getElementById('streak-counter');
+                if (streakCounter) streakCounter.textContent = streak + ' días';
+
+                const readingsCount = document.getElementById('readings-completed-count');
+                if (readingsCount) readingsCount.textContent = studentState.readingsCompleted + ' lecturas';
+
+                const resetBtn = document.getElementById('reset-profile-container');
+                if (resetBtn) resetBtn.classList.remove('hidden');
+
+                document.querySelectorAll('.interest-btn').forEach(btn => {
+                    const text = btn.textContent;
+                    studentState.interests.forEach(interest => {
+                        if (text.includes(interest)) {
+                            btn.classList.add('bg-brand-500', 'text-white', 'border-brand-500');
+                            btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+                        }
+                    });
+                });
+
+                const totalQuestions = studentState.stats.literalTotal + studentState.stats.inferentialTotal + studentState.stats.criticalTotal;
+                const totalCorrect = studentState.stats.literalCorrect + studentState.stats.inferentialCorrect + studentState.stats.criticalCorrect;
+                const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+                
+                const accuracyDisp = document.getElementById('accuracy-rate-display');
+                if (accuracyDisp) accuracyDisp.textContent = totalQuestions > 0 ? (accuracy + ' %') : '-- %';
+
+                updateAvatarPreviews();
+                updateAdaptiveEngineState();
+                updateProgressUI();
+                generateAndDisplayStudentCode();
+
+                if (studentState.diagnosticCompleted) {
+                    switchView('view-dashboard');
+                } else {
+                    switchView('view-diagnostic');
+                    startDiagnostic();
+                }
+            } else {
+                switchView('view-profile');
+            }
+        };
+    </script>
+</body>
+</html>
