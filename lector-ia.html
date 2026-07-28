@@ -107,10 +107,10 @@
     <!-- CONTENEDOR PRINCIPAL MULTI-VISTA (SPA) -->
     <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6">
 
-        <!-- MENSAJE DE ESTADO O ERROR GLOBAL -->
+        <!-- MENSAJE DE ESTADO O ERROR GLOBAL PERMANENTE -->
         <div id="status-modal" class="hidden mb-4 p-4 rounded-xl border bg-amber-50 border-amber-200 text-amber-800 text-xs flex items-center justify-between shadow-sm">
             <span id="status-modal-text">Cargando...</span>
-            <button onclick="hideStatusModal()" class="font-bold underline ml-2">Cerrar</button>
+            <button onclick="hideStatusModal()" class="font-bold underline ml-2 shrink-0">Cerrar</button>
         </div>
 
         <!-- MODAL DE CONFIRMACIÓN DE REINICIO -->
@@ -128,7 +128,7 @@
             </div>
         </div>
 
-        <!-- VISTA 1: CONFIGURACIÓN DE PERFIL INICIAL Y CÓDIGO DE RECUPERACIÓN -->
+        <!-- VISTA 1: CONFIGURACIÓN DE PERFIL INICIAL -->
         <section id="view-profile" class="space-y-6">
             <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 max-w-2xl mx-auto shadow-sm">
                 <div class="text-center space-y-2 mb-6">
@@ -136,7 +136,7 @@
                         <i data-lucide="user-check" class="w-8 h-8"></i>
                     </div>
                     <h2 class="text-2xl font-bold text-slate-900">Perfil del Estudiante</h2>
-                    <p class="text-sm text-slate-600">Configura los datos del alumno para adaptar las lecturas.</p>
+                    <p class="text-sm text-slate-600">Configura tus datos para personalizar las lecturas adaptativas.</p>
                 </div>
 
                 <div class="space-y-5">
@@ -148,10 +148,10 @@
                                 🚀
                             </div>
                             <div class="flex-1">
-                                <p class="text-xs text-slate-600 mb-2">Elige un avatar divertido o sube tu propia foto:</p>
+                                <p class="text-xs text-slate-600 mb-2">Elige un avatar o sube una imagen propia:</p>
                                 <label class="inline-flex items-center space-x-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer transition">
                                     <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                                    <span>Subir imagen propia</span>
+                                    <span>Subir foto propia</span>
                                     <input type="file" id="custom-avatar-input" accept="image/*" class="hidden" onchange="handleCustomAvatarUpload(event)">
                                 </label>
                             </div>
@@ -191,15 +191,15 @@
                     <div class="border-t border-slate-200 pt-4 mt-2">
                         <details class="group" open>
                             <summary class="flex justify-between items-center font-bold text-xs text-slate-700 cursor-pointer list-none select-none">
-                                <span>🔑 Clave API Gemini (Para IA en vivo en web pública)</span>
+                                <span>🔑 Clave API Gemini (Para IA en vivo)</span>
                                 <span class="transition group-open:rotate-180">▼</span>
                             </summary>
                             <div class="mt-3 space-y-2">
                                 <p class="text-xs text-slate-500">
-                                    Pega tu clave de Google AI Studio. Se guardará al hacer clic en "Guardar Perfil".
+                                    Pega tu clave de Google AI Studio (formato AQ... o AIzaSy...). Se guardará al hacer clic en "Guardar Perfil".
                                 </p>
                                 <div class="flex space-x-2">
-                                    <input type="password" id="api-key-input" placeholder="AIzaSy..." class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500">
+                                    <input type="password" id="api-key-input" placeholder="AQ... o AIzaSy..." class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500">
                                     <button type="button" onclick="saveApiKey()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition">
                                         Guardar
                                     </button>
@@ -215,7 +215,7 @@
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
 
-                    <!-- Reset de Datos -->
+                    <!-- Reset de Datos del Dispositivo -->
                     <div id="reset-profile-container" class="hidden text-center pt-2">
                         <button type="button" onclick="openResetModal()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold underline">
                             Borrar datos guardados de este dispositivo
@@ -503,7 +503,6 @@
 
     <!-- LÓGICA INTERACTIVA EN JAVASCRIPT -->
     <script>
-        // CONFIGURACIÓN Y ESTADO DE LA APLICACIÓN
         let apiKey = "";
 
         let studentState = {
@@ -642,17 +641,14 @@
             try {
                 const dataToSave = { studentState: studentState, xp: xp, streak: streak };
                 localStorage.setItem('lectoria_student_data', JSON.stringify(dataToSave));
-                sessionStorage.setItem('lectoria_student_data', JSON.stringify(dataToSave));
             } catch (e) {
-                console.warn("Error guardando datos:", e);
+                console.warn("Error guardando datos locales:", e);
             }
         }
 
         function loadStudentData() {
             try {
-                let saved = localStorage.getItem('lectoria_student_data');
-                if (!saved) saved = sessionStorage.getItem('lectoria_student_data');
-                
+                const saved = localStorage.getItem('lectoria_student_data');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (parsed.studentState) studentState = parsed.studentState;
@@ -661,7 +657,7 @@
                     return true;
                 }
             } catch (e) {
-                console.warn("Error cargando datos:", e);
+                console.warn("Error cargando datos locales:", e);
             }
             return false;
         }
@@ -679,7 +675,6 @@
             closeResetModal();
             try {
                 localStorage.removeItem('lectoria_student_data');
-                sessionStorage.removeItem('lectoria_student_data');
             } catch (e) {}
             location.reload();
         }
@@ -773,7 +768,6 @@
             if (welcomeMsg) welcomeMsg.textContent = `¡Hola, ${name}! Listo para tu lectura de hoy`;
 
             updateAvatarPreviews();
-            hideStatusModal();
             saveStudentData();
             playSound('pop');
 
@@ -868,8 +862,8 @@
             const key = getApiKey();
             if (!key) throw new Error('NO_API_KEY');
 
-            // Actualizado al endpoint estándar gemini-1.5-flash compatible con claves AQ y AIza
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+            // MODELO OFICIAL Y VÍNCULO ACTIVO EN AI STUDIO: gemini-2.5-flash
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
             
             const response = await fetch(url, {
                 method: 'POST',
@@ -973,29 +967,33 @@
                     
                     renderStoryInReader(currentReadingData);
                     switchView('view-reader');
-                    hideStatusModal();
-                    return;
+                    hideStatusModal(); // Solo se oculta si la llamada tuvo ÉXITO
                 } catch (error) {
                     console.warn("Fallo en API Gemini, activando motor local:", error);
-                    showStatusModal(`Aviso API: ${error.message}. Activando motor de respaldo local.`, true);
+                    // MOSTRAR EL ERROR EN LA BARRA ROJA Y NO OCULTARLA AUTOMÁTICAMENTE
+                    showStatusModal(`Aviso API: ${error.message}. Cuestionario cargado desde motor de respaldo.`, true);
+                    
+                    currentReadingData = generateLocalStory();
+                    renderStoryInReader(currentReadingData);
+                    switchView('view-reader');
                 } finally {
                     if (btn) btn.disabled = false;
                     if (spinner) spinner.classList.add('hidden');
                     if (icon) icon.classList.remove('hidden');
                     if (text) text.textContent = 'Generar Nueva Lectura con IA';
                 }
+                return; // FINALIZAR AQUÍ PARA NO SEGUIR AL BLOQUE SIN CLAVE NI OCULTAR LA BARRA ROJA
             }
 
-            setTimeout(() => {
-                currentReadingData = generateLocalStory();
-                renderStoryInReader(currentReadingData);
-                switchView('view-reader');
-                hideStatusModal();
-                if (btn) btn.disabled = false;
-                if (spinner) spinner.classList.add('hidden');
-                if (icon) icon.classList.remove('hidden');
-                if (text) text.textContent = 'Generar Nueva Lectura con IA';
-            }, 300);
+            // MODO SIN CLAVE
+            currentReadingData = generateLocalStory();
+            renderStoryInReader(currentReadingData);
+            switchView('view-reader');
+            hideStatusModal();
+            if (btn) btn.disabled = false;
+            if (spinner) spinner.classList.add('hidden');
+            if (icon) icon.classList.remove('hidden');
+            if (text) text.textContent = 'Generar Nueva Lectura con IA';
         }
 
         function renderStoryInReader(story) {
@@ -1282,7 +1280,7 @@
             const text = document.getElementById('status-modal-text');
             if (modal && text) {
                 text.textContent = msg;
-                modal.className = `mb-4 p-4 rounded-xl border text-xs flex items-center justify-between ${isError ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-sky-50 border-sky-200 text-sky-800'}`;
+                modal.className = `mb-4 p-4 rounded-xl border text-xs flex items-center justify-between ${isError ? 'bg-rose-50 border-rose-200 text-rose-800 font-medium' : 'bg-sky-50 border-sky-200 text-sky-800'}`;
                 modal.classList.remove('hidden');
             }
         }
