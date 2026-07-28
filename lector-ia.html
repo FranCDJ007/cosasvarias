@@ -73,13 +73,19 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Logo y Nombre de la App -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('view-dashboard')">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('view-profile')">
                 <div id="header-avatar-display" class="bg-brand-500 text-white w-10 h-10 rounded-xl shadow-md flex items-center justify-center text-xl overflow-hidden shrink-0">
                     <i data-lucide="book-open-check" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight text-slate-900">Lector-IA</h1>
-                    <p class="text-xs text-slate-500" id="profile-name-display">Configurar perfil</p>
+                    <div class="flex items-center space-x-1.5">
+                        <h1 class="font-bold text-lg leading-tight text-slate-900">Lector-IA</h1>
+                        <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-200">Multiperfil</span>
+                    </div>
+                    <p class="text-xs text-brand-600 font-medium flex items-center space-x-1" id="profile-name-display">
+                        <span>Configurar perfil</span>
+                        <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                    </p>
                 </div>
             </div>
 
@@ -87,7 +93,7 @@
             <nav class="hidden md:flex items-center space-x-1">
                 <button onclick="switchView('view-dashboard')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Misiones</button>
                 <button onclick="switchView('view-progress')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Progreso</button>
-                <button onclick="switchView('view-profile')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Perfil</button>
+                <button onclick="switchView('view-profile')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Perfil / Alumnos</button>
             </nav>
 
             <!-- Indicadores de Gamificación -->
@@ -113,30 +119,44 @@
             <button onclick="hideStatusModal()" class="font-bold underline ml-2 shrink-0">Cerrar</button>
         </div>
 
-        <!-- MODAL DE CONFIRMACIÓN DE REINICIO -->
+        <!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN DE PERFIL -->
         <div id="confirm-reset-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl text-center space-y-4">
                 <div class="p-3 bg-rose-100 text-rose-600 rounded-full inline-block">
                     <i data-lucide="alert-triangle" class="w-8 h-8"></i>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900">¿Reiniciar todos los datos?</h3>
-                <p class="text-xs text-slate-600">Se borrarán las lecturas completadas, los puntos XP y el perfil actual de este dispositivo.</p>
+                <h3 class="text-lg font-bold text-slate-900">¿Eliminar este perfil?</h3>
+                <p class="text-xs text-slate-600">Se borrará únicamente la información y los datos conseguidos por este estudiante en este equipo.</p>
                 <div class="flex space-x-3 pt-2">
                     <button onclick="closeResetModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-xs">Cancelar</button>
-                    <button onclick="executeResetData()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-xl text-xs">Sí, borrar todo</button>
+                    <button onclick="executeResetData()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-xl text-xs">Sí, eliminar perfil</button>
                 </div>
             </div>
         </div>
 
-        <!-- VISTA 1: CONFIGURACIÓN DE PERFIL INICIAL -->
+        <!-- VISTA 1: GESTIÓN Y CONFIGURACIÓN DE PERFILES -->
         <section id="view-profile" class="space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 max-w-2xl mx-auto shadow-sm">
-                <div class="text-center space-y-2 mb-6">
-                    <div class="inline-flex bg-brand-50 text-brand-600 p-3 rounded-2xl mb-1">
-                        <i data-lucide="user-check" class="w-8 h-8"></i>
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 max-w-2xl mx-auto shadow-sm space-y-6">
+                
+                <!-- SELECCIÓN / LISTADO DE PERFILES REGISTRADOS -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Estudiantes en este equipo</label>
+                        <button onclick="startNewProfileCreation()" class="text-xs text-brand-600 hover:text-brand-700 font-bold flex items-center space-x-1 bg-brand-50 hover:bg-brand-100 px-2.5 py-1 rounded-lg transition">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                            <span>+ Nuevo Estudiante</span>
+                        </button>
                     </div>
-                    <h2 class="text-2xl font-bold text-slate-900">Perfil del Estudiante</h2>
-                    <p class="text-sm text-slate-600">Configura tus datos para personalizar las lecturas adaptativas.</p>
+                    <div id="profiles-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Tarjetas dinámicas de perfiles -->
+                    </div>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <div class="text-center space-y-1 mb-4">
+                    <h2 class="text-xl font-bold text-slate-900" id="profile-form-title">Configurar Perfil de Estudiante</h2>
+                    <p class="text-xs text-slate-500">Edita los detalles del perfil activo o crea uno nuevo</p>
                 </div>
 
                 <div class="space-y-5">
@@ -177,7 +197,7 @@
                     <!-- Temas de Interés -->
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">¿Qué temas le interesan más? (Elige al menos uno)</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="interests-container">
                             <button type="button" onclick="toggleInterest(this, 'Ciencia y Espacio')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🚀 Ciencia y Espacio</button>
                             <button type="button" onclick="toggleInterest(this, 'Misterio y Detectives')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🔍 Misterio</button>
                             <button type="button" onclick="toggleInterest(this, 'Deportes y Aventuras')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">⚽ Deportes</button>
@@ -196,7 +216,7 @@
                             </summary>
                             <div class="mt-3 space-y-2">
                                 <p class="text-xs text-slate-500">
-                                    Pega tu clave de Google AI Studio (formato AQ... o AIzaSy...). Se guardará al hacer clic en "Guardar Perfil".
+                                    Pega tu clave de Google AI Studio (formato AQ... o AIzaSy...). Esta clave se comparte entre todos los alumnos de este equipo.
                                 </p>
                                 <div class="flex space-x-2">
                                     <input type="password" id="api-key-input" placeholder="AQ... o AIzaSy..." class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500">
@@ -215,10 +235,10 @@
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
 
-                    <!-- Reset de Datos del Dispositivo -->
+                    <!-- Borrar Perfil Activo -->
                     <div id="reset-profile-container" class="hidden text-center pt-2">
                         <button type="button" onclick="openResetModal()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold underline">
-                            Borrar datos guardados de este dispositivo
+                            Eliminar este perfil de este dispositivo
                         </button>
                     </div>
                 </div>
@@ -455,7 +475,7 @@
                 <div class="flex items-center justify-between border-b pb-4">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900">Progreso por Dimensiones de Comprensión</h2>
-                        <p class="text-xs text-slate-500">Métricas analíticas basadas en el desempeño continuo</p>
+                        <p class="text-xs text-slate-500">Métricas analíticas basadas en el desempeño continuo de <span id="progress-student-name" class="font-bold text-brand-600">este perfil</span></p>
                     </div>
                     <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
                         <i data-lucide="line-chart" class="w-5 h-5"></i>
@@ -503,27 +523,40 @@
 
     <!-- LÓGICA INTERACTIVA EN JAVASCRIPT -->
     <script>
-        // CONFIGURACIÓN Y ESTADO DE LA APLICACIÓN
+        // CONFIGURACIÓN DE MULTIPERFIL Y ESTADO DE LA APLICACIÓN
         let apiKey = "";
 
-        let studentState = {
-            name: '',
-            avatar: '🚀',
-            avatarType: 'emoji',
-            interests: [],
-            level: 1,
-            diagnosticCompleted: false,
-            readingsCompleted: 0,
-            stats: {
-                literalTotal: 0, literalCorrect: 0,
-                inferentialTotal: 0, inferentialCorrect: 0,
-                criticalTotal: 0, criticalCorrect: 0
-            }
-        };
+        // Lista global de perfiles almacenados
+        let profilesList = [];
+        let activeProfileId = null;
+
+        // Estructura por defecto para un nuevo perfil
+        function createDefaultProfileObject(id, name) {
+            return {
+                id: id || ('prof_' + Date.now() + '_' + Math.floor(Math.random()*1000)),
+                studentState: {
+                    name: name || '',
+                    avatar: '🚀',
+                    avatarType: 'emoji',
+                    interests: [],
+                    level: 1,
+                    diagnosticCompleted: false,
+                    readingsCompleted: 0,
+                    stats: {
+                        literalTotal: 0, literalCorrect: 0,
+                        inferentialTotal: 0, inferentialCorrect: 0,
+                        criticalTotal: 0, criticalCorrect: 0
+                    }
+                },
+                xp: 0,
+                streak: 0
+            };
+        }
+
+        let currentProfileObj = createDefaultProfileObject();
+        let isCreatingNewProfileMode = false;
 
         let currentStep = 1;
-        let xp = 0;
-        let streak = 0;
         let fontSize = 16;
         let isSpeaking = false;
         let voices = [];
@@ -638,29 +671,218 @@
         ];
         let currentDiagIndex = 0;
 
-        function saveStudentData() {
+        // MANEJO DE ALMACENAMIENTO DE MULTIPERFIL EN LOCALSTORAGE
+        function saveAllProfilesData() {
             try {
-                const dataToSave = { studentState: studentState, xp: xp, streak: streak };
-                localStorage.setItem('lectoria_student_data', JSON.stringify(dataToSave));
+                if (currentProfileObj && currentProfileObj.id) {
+                    const idx = profilesList.findIndex(p => p.id === currentProfileObj.id);
+                    if (idx !== -1) {
+                        profilesList[idx] = currentProfileObj;
+                    } else {
+                        profilesList.push(currentProfileObj);
+                    }
+                    activeProfileId = currentProfileObj.id;
+                }
+                
+                localStorage.setItem('lectoria_profiles_v2', JSON.stringify(profilesList));
+                localStorage.setItem('lectoria_active_profile_id', activeProfileId || '');
             } catch (e) {
-                console.warn("Error guardando datos locales:", e);
+                console.warn("Error guardando perfiles en el dispositivo:", e);
             }
         }
 
-        function loadStudentData() {
+        function loadAllProfilesData() {
             try {
-                const saved = localStorage.getItem('lectoria_student_data');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (parsed.studentState) studentState = parsed.studentState;
-                    if (parsed.xp !== undefined) xp = parsed.xp;
-                    if (parsed.streak !== undefined) streak = parsed.streak;
+                const savedProfiles = localStorage.getItem('lectoria_profiles_v2');
+                const savedActiveId = localStorage.getItem('lectoria_active_profile_id');
+
+                if (savedProfiles) {
+                    profilesList = JSON.parse(savedProfiles) || [];
+                }
+
+                // Migración automática si existe un perfil antiguo con la estructura v1
+                if (profilesList.length === 0) {
+                    const oldSingleData = localStorage.getItem('lectoria_student_data');
+                    if (oldSingleData) {
+                        const parsedOld = JSON.parse(oldSingleData);
+                        if (parsedOld && parsedOld.studentState && parsedOld.studentState.name) {
+                            const migratedProfile = {
+                                id: 'prof_migrated_' + Date.now(),
+                                studentState: parsedOld.studentState,
+                                xp: parsedOld.xp || 0,
+                                streak: parsedOld.streak || 0
+                            };
+                            profilesList.push(migratedProfile);
+                        }
+                    }
+                }
+
+                if (profilesList.length > 0) {
+                    const foundActive = profilesList.find(p => p.id === savedActiveId);
+                    currentProfileObj = foundActive ? foundActive : profilesList[0];
+                    activeProfileId = currentProfileObj.id;
                     return true;
                 }
             } catch (e) {
-                console.warn("Error cargando datos locales:", e);
+                console.warn("Error cargando perfiles desde el dispositivo:", e);
             }
             return false;
+        }
+
+        function renderProfilesListUI() {
+            const container = document.getElementById('profiles-list-container');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (profilesList.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic col-span-2">No hay estudiantes registrados. Crea el primero a continuación.</p>`;
+                return;
+            }
+
+            profilesList.forEach(profile => {
+                const isActive = profile.id === activeProfileId && !isCreatingNewProfileMode;
+                const s = profile.studentState;
+                const name = s.name || 'Estudiante';
+                const avatar = s.avatarType === 'image' ? `<img src="${s.avatar}" class="w-full h-full object-cover">` : `<span class="text-xl">${s.avatar || '🚀'}</span>`;
+
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border flex items-center justify-between cursor-pointer transition ${isActive ? 'bg-brand-50 border-brand-500 shadow-sm ring-1 ring-brand-500' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'}`;
+                
+                card.onclick = () => switchActiveProfile(profile.id);
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
+                            ${avatar}
+                        </div>
+                        <div class="truncate">
+                            <h4 class="font-bold text-xs text-slate-900 truncate">${name}</h4>
+                            <p class="text-[10px] text-slate-500">Nivel ${s.level || 1} • ${profile.xp || 0} XP</p>
+                        </div>
+                    </div>
+                    ${isActive ? `<span class="text-[10px] bg-brand-500 text-white font-bold px-2 py-0.5 rounded-full shrink-0">Activo</span>` : `<span class="text-[10px] text-slate-400 font-semibold hover:text-brand-600 shrink-0">Elegir</span>`}
+                `;
+
+                container.appendChild(card);
+            });
+
+            initIcons();
+        }
+
+        function switchActiveProfile(profileId) {
+            const target = profilesList.find(p => p.id === profileId);
+            if (!target) return;
+
+            isCreatingNewProfileMode = false;
+            currentProfileObj = target;
+            activeProfileId = target.id;
+
+            saveAllProfilesData();
+            updateAllUiForActiveProfile();
+            playSound('pop');
+
+            if (currentProfileObj.studentState.diagnosticCompleted) {
+                switchView('view-dashboard');
+            } else {
+                switchView('view-diagnostic');
+                startDiagnostic();
+            }
+        }
+
+        function startNewProfileCreation() {
+            isCreatingNewProfileMode = true;
+            currentProfileObj = createDefaultProfileObject();
+            
+            // Limpiar formulario de perfil
+            const nameInput = document.getElementById('student-name-input');
+            if (nameInput) nameInput.value = '';
+
+            const formTitle = document.getElementById('profile-form-title');
+            if (formTitle) formTitle.textContent = 'Crear Nuevo Perfil de Estudiante';
+
+            currentProfileObj.studentState.avatar = '🚀';
+            currentProfileObj.studentState.avatarType = 'emoji';
+            currentProfileObj.studentState.interests = [];
+
+            updateAvatarPreviews();
+
+            document.querySelectorAll('.interest-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-500', 'text-white', 'border-brand-500');
+                btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+            });
+
+            const resetBtn = document.getElementById('reset-profile-container');
+            if (resetBtn) resetBtn.classList.add('hidden');
+
+            renderProfilesListUI();
+            playSound('pop');
+        }
+
+        function updateAllUiForActiveProfile() {
+            const s = currentProfileObj.studentState;
+
+            const nameInput = document.getElementById('student-name-input');
+            if (nameInput) nameInput.value = s.name || '';
+
+            const formTitle = document.getElementById('profile-form-title');
+            if (formTitle) formTitle.textContent = isCreatingNewProfileMode ? 'Crear Nuevo Perfil de Estudiante' : `Editar Perfil de ${s.name || 'Estudiante'}`;
+
+            const profileDisplay = document.getElementById('profile-name-display');
+            if (profileDisplay) {
+                profileDisplay.innerHTML = `<span>${s.name || 'Configurar perfil'}</span><i data-lucide="chevron-down" class="w-3 h-3"></i>`;
+            }
+
+            const welcomeMsg = document.getElementById('welcome-message');
+            if (welcomeMsg) welcomeMsg.textContent = `¡Hola, ${s.name || 'estudiante'}! Listo para tu lectura de hoy`;
+
+            const progStudentName = document.getElementById('progress-student-name');
+            if (progStudentName) progStudentName.textContent = s.name || 'este perfil';
+
+            const xpCounter = document.getElementById('xp-counter');
+            if (xpCounter) xpCounter.textContent = (currentProfileObj.xp || 0) + ' XP';
+
+            const streakCounter = document.getElementById('streak-counter');
+            if (streakCounter) streakCounter.textContent = (currentProfileObj.streak || 0) + ' días';
+
+            const readingsCount = document.getElementById('readings-completed-count');
+            if (readingsCount) readingsCount.textContent = (s.readingsCompleted || 0) + ' lecturas';
+
+            const resetBtn = document.getElementById('reset-profile-container');
+            if (resetBtn) {
+                if (profilesList.length > 0 && !isCreatingNewProfileMode) resetBtn.classList.remove('hidden');
+                else resetBtn.classList.add('hidden');
+            }
+
+            // Actualizar botones de intereses
+            document.querySelectorAll('.interest-btn').forEach(btn => {
+                const text = btn.textContent;
+                let found = false;
+                s.interests.forEach(interest => {
+                    if (text.includes(interest)) found = true;
+                });
+
+                if (found) {
+                    btn.classList.add('bg-brand-500', 'text-white', 'border-brand-500');
+                    btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+                } else {
+                    btn.classList.remove('bg-brand-500', 'text-white', 'border-brand-500');
+                    btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+                }
+            });
+
+            const totalQuestions = s.stats.literalTotal + s.stats.inferentialTotal + s.stats.criticalTotal;
+            const totalCorrect = s.stats.literalCorrect + s.stats.inferentialCorrect + s.stats.criticalCorrect;
+            const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+            
+            const accuracyDisp = document.getElementById('accuracy-rate-display');
+            if (accuracyDisp) accuracyDisp.textContent = totalQuestions > 0 ? (accuracy + ' %') : '-- %';
+
+            updateAvatarPreviews();
+            updateAdaptiveEngineState();
+            updateProgressUI();
+            renderProfilesListUI();
+            initIcons();
         }
 
         function openResetModal() {
@@ -674,10 +896,15 @@
 
         function executeResetData() {
             closeResetModal();
-            try {
-                localStorage.removeItem('lectoria_student_data');
-            } catch (e) {}
-            location.reload();
+            if (activeProfileId) {
+                profilesList = profilesList.filter(p => p.id !== activeProfileId);
+                if (profilesList.length > 0) {
+                    switchActiveProfile(profilesList[0].id);
+                } else {
+                    startNewProfileCreation();
+                }
+                saveAllProfilesData();
+            }
         }
 
         function switchView(viewId) {
@@ -697,21 +924,23 @@
 
             if (!previewBox || !headerDisplay) return;
 
-            if (studentState.avatarType === 'image' && studentState.avatar) {
-                previewBox.innerHTML = `<img src="${studentState.avatar}" alt="Avatar" class="w-full h-full object-cover">`;
-                headerDisplay.innerHTML = `<img src="${studentState.avatar}" alt="Avatar" class="w-full h-full object-cover">`;
+            const s = currentProfileObj.studentState;
+
+            if (s.avatarType === 'image' && s.avatar) {
+                previewBox.innerHTML = `<img src="${s.avatar}" alt="Avatar" class="w-full h-full object-cover">`;
+                headerDisplay.innerHTML = `<img src="${s.avatar}" alt="Avatar" class="w-full h-full object-cover">`;
             } else {
-                const emoji = studentState.avatar || '🚀';
+                const emoji = s.avatar || '🚀';
                 previewBox.innerHTML = `<span class="text-3xl">${emoji}</span>`;
                 headerDisplay.innerHTML = `<span class="text-xl">${emoji}</span>`;
             }
         }
 
         function selectPresetAvatar(emoji) {
-            studentState.avatar = emoji;
-            studentState.avatarType = 'emoji';
+            currentProfileObj.studentState.avatar = emoji;
+            currentProfileObj.studentState.avatarType = 'emoji';
             updateAvatarPreviews();
-            saveStudentData();
+            saveAllProfilesData();
             playSound('pop');
         }
 
@@ -726,27 +955,28 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                studentState.avatar = e.target.result;
-                studentState.avatarType = 'image';
+                currentProfileObj.studentState.avatar = e.target.result;
+                currentProfileObj.studentState.avatarType = 'image';
                 updateAvatarPreviews();
-                saveStudentData();
+                saveAllProfilesData();
                 playSound('pop');
             };
             reader.readAsDataURL(file);
         }
 
         function toggleInterest(btn, interest) {
-            const idx = studentState.interests.indexOf(interest);
+            const interests = currentProfileObj.studentState.interests;
+            const idx = interests.indexOf(interest);
             if (idx === -1) {
-                studentState.interests.push(interest);
+                interests.push(interest);
                 btn.classList.add('bg-brand-500', 'text-white', 'border-brand-500');
                 btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
             } else {
-                studentState.interests.splice(idx, 1);
+                interests.splice(idx, 1);
                 btn.classList.remove('bg-brand-500', 'text-white', 'border-brand-500');
                 btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
             }
-            saveStudentData();
+            saveAllProfilesData();
         }
 
         function saveProfile() {
@@ -760,19 +990,15 @@
                 return;
             }
 
-            studentState.name = name;
-            
-            const profileDisplay = document.getElementById('profile-name-display');
-            if (profileDisplay) profileDisplay.textContent = name;
+            currentProfileObj.studentState.name = name;
+            isCreatingNewProfileMode = false;
 
-            const welcomeMsg = document.getElementById('welcome-message');
-            if (welcomeMsg) welcomeMsg.textContent = `¡Hola, ${name}! Listo para tu lectura de hoy`;
-
-            updateAvatarPreviews();
-            saveStudentData();
+            saveAllProfilesData();
+            updateAllUiForActiveProfile();
+            hideStatusModal();
             playSound('pop');
 
-            if (!studentState.diagnosticCompleted) {
+            if (!currentProfileObj.studentState.diagnosticCompleted) {
                 switchView('view-diagnostic');
                 startDiagnostic();
             } else {
@@ -815,16 +1041,16 @@
             currentDiagIndex++;
             playSound('pop');
             if (currentDiagIndex >= diagQuestions.length) {
-                studentState.diagnosticCompleted = true;
-                studentState.level = 2;
-                xp += 50;
+                currentProfileObj.studentState.diagnosticCompleted = true;
+                currentProfileObj.studentState.level = 2;
+                currentProfileObj.xp += 50;
 
-                document.getElementById('xp-counter').textContent = xp + ' XP';
+                document.getElementById('xp-counter').textContent = currentProfileObj.xp + ' XP';
                 document.getElementById('diag-question-container')?.classList.add('hidden');
                 document.getElementById('diag-complete-box')?.classList.remove('hidden');
 
                 updateAdaptiveEngineState();
-                saveStudentData();
+                saveAllProfilesData();
                 playSound('fanfare');
             } else {
                 renderDiagnosticStep();
@@ -859,7 +1085,7 @@
             }
         }
 
-        // FUNCIÓN MEJORADA: Prueba automáticamente gemini-3.5-flash y modelos compatibles
+        // PRUEBA EN CASCADA DE MODELOS (gemini-3.5-flash -> gemini-2.5-flash -> gemini-1.5-flash)
         async function callGeminiApi(payload) {
             const key = getApiKey();
             if (!key) throw new Error('NO_API_KEY');
@@ -884,7 +1110,6 @@
                     const errMsg = errData.error?.message || `HTTP ${response.status}`;
                     lastError = new Error(errMsg);
 
-                    // Si el error no es 404 ni deprecación/no disponible para usuarios nuevos, es un problema de autenticación o cuota: lanzar de inmediato
                     const isModelUnavailable = response.status === 404 || 
                                               errMsg.toLowerCase().includes('not found') || 
                                               errMsg.toLowerCase().includes('no longer available');
@@ -901,11 +1126,11 @@
                     }
                 }
             }
-            throw lastError || new Error('No se pudo establecer conexión con ningún modelo de Gemini disponible.');
+            throw lastError || new Error('No se pudo establecer conexión con los modelos de Gemini disponibles.');
         }
 
         function generateLocalStory() {
-            const index = studentState.readingsCompleted % localStoryBank.length;
+            const index = currentProfileObj.studentState.readingsCompleted % localStoryBank.length;
             const template = localStoryBank[index] || localStoryBank[0];
             const story = JSON.parse(JSON.stringify(template));
             story.isAiGenerated = false;
@@ -929,7 +1154,8 @@
 
             if (activeKey) {
                 showStatusModal('Conectando con Gemini IA para redactar una historia a tu medida...', false);
-                const chosenInterests = studentState.interests.length > 0 ? studentState.interests.join(', ') : 'Misterio y Ciencia';
+                const s = currentProfileObj.studentState;
+                const chosenInterests = s.interests.length > 0 ? s.interests.join(', ') : 'Misterio y Ciencia';
 
                 const levelSpecs = {
                     1: 'Longitud de 120 a 150 palabras. Sintaxis sencilla, oraciones cortas.',
@@ -937,9 +1163,9 @@
                     3: 'Longitud de 250 a 300 palabras. Sintaxis rica con vocabulario desafiante.'
                 };
 
-                const userPrompt = `Crea una micro-lectura inédita e interactiva para un niño de 11 años llamado ${studentState.name || 'el estudiante'}.
+                const userPrompt = `Crea una micro-lectura inédita e interactiva para un niño de 11 años llamado ${s.name || 'el estudiante'}.
                 Temas preferidos: ${chosenInterests}.
-                Nivel pedagógico: Nivel ${studentState.level} (${levelSpecs[studentState.level] || levelSpecs[1]}).
+                Nivel pedagógico: Nivel ${s.level} (${levelSpecs[s.level] || levelSpecs[1]}).
                 Asegúrate de envolver 3 o 4 palabras de vocabulario con asteriscos dobles como **ejemplo** en el contenido del texto.
                 Genera también una pregunta literal (con opción correcta 'A', 'B' o 'C'), una pregunta inferencial y una pregunta crítica de opinión.`;
 
@@ -1124,7 +1350,8 @@
                 required: ["isValid", "title", "feedback"]
             };
 
-            const userPrompt = `Evalúa la respuesta de 11 años (${studentState.name}). Pregunta: "${currentReadingData.questionCritical.question}". Respuesta: "${studentText}".`;
+            const s = currentProfileObj.studentState;
+            const userPrompt = `Evalúa la respuesta de 11 años (${s.name}). Pregunta: "${currentReadingData.questionCritical.question}". Respuesta: "${studentText}".`;
             const systemPrompt = `Eres un tutor IA empático para niños de 11 años. Valora la argumentación. Devuelve JSON válido.`;
 
             const payload = {
@@ -1231,39 +1458,40 @@
                 document.getElementById('summary-card')?.classList.remove('hidden');
                 document.getElementById('step-indicator').textContent = '¡Completado!';
 
-                studentState.readingsCompleted += 1;
-                studentState.stats.literalTotal += 1;
-                if (currentStepScores.q1) studentState.stats.literalCorrect += 1;
+                const s = currentProfileObj.studentState;
+                s.readingsCompleted += 1;
+                s.stats.literalTotal += 1;
+                if (currentStepScores.q1) s.stats.literalCorrect += 1;
 
-                studentState.stats.inferentialTotal += 1;
-                if (currentStepScores.q2) studentState.stats.inferentialCorrect += 1;
+                s.stats.inferentialTotal += 1;
+                if (currentStepScores.q2) s.stats.inferentialCorrect += 1;
 
-                studentState.stats.criticalTotal += 1;
-                if (currentStepScores.q3) studentState.stats.criticalCorrect += 1;
+                s.stats.criticalTotal += 1;
+                if (currentStepScores.q3) s.stats.criticalCorrect += 1;
 
-                xp += 50;
-                streak = Math.max(1, streak + 1);
+                currentProfileObj.xp += 50;
+                currentProfileObj.streak = Math.max(1, currentProfileObj.streak + 1);
 
-                document.getElementById('xp-counter').textContent = xp + ' XP';
-                document.getElementById('streak-counter').textContent = streak + ' días';
-                document.getElementById('readings-completed-count').textContent = studentState.readingsCompleted + ' lecturas';
+                document.getElementById('xp-counter').textContent = currentProfileObj.xp + ' XP';
+                document.getElementById('streak-counter').textContent = currentProfileObj.streak + ' días';
+                document.getElementById('readings-completed-count').textContent = s.readingsCompleted + ' lecturas';
 
-                const totalQuestions = studentState.stats.literalTotal + studentState.stats.inferentialTotal + studentState.stats.criticalTotal;
-                const totalCorrect = studentState.stats.literalCorrect + studentState.stats.inferentialCorrect + studentState.stats.criticalCorrect;
+                const totalQuestions = s.stats.literalTotal + s.stats.inferentialTotal + s.stats.criticalTotal;
+                const totalCorrect = s.stats.literalCorrect + s.stats.inferentialCorrect + s.stats.criticalCorrect;
                 const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
                 document.getElementById('accuracy-rate-display').textContent = accuracy + ' %';
 
-                if (accuracy >= 80 && studentState.level < 3) {
-                    studentState.level += 1;
-                    document.getElementById('summary-adaptive-feedback').textContent = '¡Enhorabuena! Has subido al Nivel ' + studentState.level + ' gracias a tu alta precisión.';
+                if (accuracy >= 80 && s.level < 3) {
+                    s.level += 1;
+                    document.getElementById('summary-adaptive-feedback').textContent = '¡Enhorabuena! Has subido al Nivel ' + s.level + ' gracias a tu alta precisión.';
                 } else {
                     document.getElementById('summary-adaptive-feedback').textContent = 'Excelente trabajo manteniendo tu nivel adaptativo.';
                 }
 
                 updateAdaptiveEngineState();
                 updateProgressUI();
-                saveStudentData();
+                saveAllProfilesData();
                 playSound('fanfare');
             }
         }
@@ -1315,6 +1543,7 @@
         }
 
         function updateAdaptiveEngineState() {
+            const s = currentProfileObj.studentState;
             const lvlMap = { 1: 'Nivel 1: Iniciación', 2: 'Nivel 2: Explorador', 3: 'Nivel 3: Avanzado' };
             const descMap = {
                 1: 'Lecturas breves (120-150 palabras), estructuras sencillas y apoyo directo.',
@@ -1325,12 +1554,12 @@
             const tag = document.getElementById('adaptive-level-tag');
             const desc = document.getElementById('adaptive-level-desc');
 
-            if (tag) tag.textContent = lvlMap[studentState.level] || lvlMap[2];
-            if (desc) desc.textContent = descMap[studentState.level] || descMap[2];
+            if (tag) tag.textContent = lvlMap[s.level] || lvlMap[2];
+            if (desc) desc.textContent = descMap[s.level] || descMap[2];
         }
 
         function updateProgressUI() {
-            const s = studentState.stats;
+            const s = currentProfileObj.studentState.stats;
             const litPct = s.literalTotal > 0 ? Math.round((s.literalCorrect / s.literalTotal) * 100) : 0;
             const infPct = s.inferentialTotal > 0 ? Math.round((s.inferentialCorrect / s.inferentialTotal) * 100) : 0;
             const critPct = s.criticalTotal > 0 ? Math.round((s.criticalCorrect / s.criticalTotal) * 100) : 0;
@@ -1481,58 +1710,19 @@
                 }
             }
 
-            const hasData = loadStudentData();
+            const hasProfiles = loadAllProfilesData();
 
-            if (hasData && studentState.name) {
-                const nameInput = document.getElementById('student-name-input');
-                if (nameInput) nameInput.value = studentState.name;
+            if (hasProfiles && currentProfileObj.studentState.name) {
+                updateAllUiForActiveProfile();
 
-                const profileDisplay = document.getElementById('profile-name-display');
-                if (profileDisplay) profileDisplay.textContent = studentState.name;
-
-                const welcomeMsg = document.getElementById('welcome-message');
-                if (welcomeMsg) welcomeMsg.textContent = `¡Hola, ${studentState.name}! Listo para tu lectura de hoy`;
-
-                const xpCounter = document.getElementById('xp-counter');
-                if (xpCounter) xpCounter.textContent = xp + ' XP';
-
-                const streakCounter = document.getElementById('streak-counter');
-                if (streakCounter) streakCounter.textContent = streak + ' días';
-
-                const readingsCount = document.getElementById('readings-completed-count');
-                if (readingsCount) readingsCount.textContent = studentState.readingsCompleted + ' lecturas';
-
-                const resetBtn = document.getElementById('reset-profile-container');
-                if (resetBtn) resetBtn.classList.remove('hidden');
-
-                document.querySelectorAll('.interest-btn').forEach(btn => {
-                    const text = btn.textContent;
-                    studentState.interests.forEach(interest => {
-                        if (text.includes(interest)) {
-                            btn.classList.add('bg-brand-500', 'text-white', 'border-brand-500');
-                            btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
-                        }
-                    });
-                });
-
-                const totalQuestions = studentState.stats.literalTotal + studentState.stats.inferentialTotal + studentState.stats.criticalTotal;
-                const totalCorrect = studentState.stats.literalCorrect + studentState.stats.inferentialCorrect + studentState.stats.criticalCorrect;
-                const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
-                
-                const accuracyDisp = document.getElementById('accuracy-rate-display');
-                if (accuracyDisp) accuracyDisp.textContent = totalQuestions > 0 ? (accuracy + ' %') : '-- %';
-
-                updateAvatarPreviews();
-                updateAdaptiveEngineState();
-                updateProgressUI();
-
-                if (studentState.diagnosticCompleted) {
+                if (currentProfileObj.studentState.diagnosticCompleted) {
                     switchView('view-dashboard');
                 } else {
                     switchView('view-diagnostic');
                     startDiagnostic();
                 }
             } else {
+                startNewProfileCreation();
                 switchView('view-profile');
             }
         };
