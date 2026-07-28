@@ -503,6 +503,7 @@
 
     <!-- LÓGICA INTERACTIVA EN JAVASCRIPT -->
     <script>
+        // CONFIGURACIÓN Y ESTADO DE LA APLICACIÓN
         let apiKey = "";
 
         let studentState = {
@@ -858,25 +859,49 @@
             }
         }
 
+        // FUNCIÓN MEJORADA: Prueba automáticamente gemini-3.5-flash y modelos compatibles
         async function callGeminiApi(payload) {
             const key = getApiKey();
             if (!key) throw new Error('NO_API_KEY');
 
-            // MODELO OFICIAL Y VÍNCULO ACTIVO EN AI STUDIO: gemini-2.5-flash
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            const modelsToTry = ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+            let lastError = null;
 
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error?.message || `HTTP ${response.status}`);
+            for (const model of modelsToTry) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        return await response.json();
+                    }
+
+                    const errData = await response.json().catch(() => ({}));
+                    const errMsg = errData.error?.message || `HTTP ${response.status}`;
+                    lastError = new Error(errMsg);
+
+                    // Si el error no es 404 ni deprecación/no disponible para usuarios nuevos, es un problema de autenticación o cuota: lanzar de inmediato
+                    const isModelUnavailable = response.status === 404 || 
+                                              errMsg.toLowerCase().includes('not found') || 
+                                              errMsg.toLowerCase().includes('no longer available');
+                    
+                    if (!isModelUnavailable) {
+                        throw lastError;
+                    }
+                } catch (e) {
+                    lastError = e;
+                    if (e.message && !e.message.includes('404') && 
+                        !e.message.toLowerCase().includes('not found') && 
+                        !e.message.toLowerCase().includes('no longer available')) {
+                        throw e;
+                    }
+                }
             }
-
-            return await response.json();
+            throw lastError || new Error('No se pudo establecer conexión con ningún modelo de Gemini disponible.');
         }
 
         function generateLocalStory() {
@@ -967,22 +992,22 @@
                     
                     renderStoryInReader(currentReadingData);
                     switchView('view-reader');
-                    hideStatusModal(); // Solo se oculta si la llamada tuvo ÉXITO
+                    hideStatusModal();
+                    return;
                 } catch (error) {
                     console.warn("Fallo en API Gemini, activando motor local:", error);
-                    // MOSTRAR EL ERROR EN LA BARRA ROJA Y NO OCULTARLA AUTOMÁTICAMENTE
                     showStatusModal(`Aviso API: ${error.message}. Cuestionario cargado desde motor de respaldo.`, true);
                     
                     currentReadingData = generateLocalStory();
                     renderStoryInReader(currentReadingData);
                     switchView('view-reader');
+                    return;
                 } finally {
                     if (btn) btn.disabled = false;
                     if (spinner) spinner.classList.add('hidden');
                     if (icon) icon.classList.remove('hidden');
                     if (text) text.textContent = 'Generar Nueva Lectura con IA';
                 }
-                return; // FINALIZAR AQUÍ PARA NO SEGUIR AL BLOQUE SIN CLAVE NI OCULTAR LA BARRA ROJA
             }
 
             // MODO SIN CLAVE
