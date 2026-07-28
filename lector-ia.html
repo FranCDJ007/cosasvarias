@@ -194,7 +194,7 @@
                         <input type="text" id="student-name-input" placeholder="Ej: Lucas" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none">
                     </div>
 
-                    <!-- Temas de Interés -->
+                    <!-- Temas de Interés (Predeterminados) -->
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">¿Qué temas le interesan más? (Elige al menos uno)</label>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="interests-container">
@@ -204,6 +204,31 @@
                             <button type="button" onclick="toggleInterest(this, 'Videojuegos y Tecnología')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🎮 Videojuegos</button>
                             <button type="button" onclick="toggleInterest(this, 'Animales y Naturaleza')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🌿 Naturaleza</button>
                             <button type="button" onclick="toggleInterest(this, 'Historia y Leyendas')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🏰 Historia</button>
+                        </div>
+                    </div>
+
+                    <!-- NUEVA SECCIÓN: TEMAS PROPIOS SUGERIDOS POR EL ESTUDIANTE (MÁXIMO 3) -->
+                    <div class="bg-sky-50 border border-sky-100 p-4 rounded-xl space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-sky-900 uppercase tracking-wider flex items-center space-x-1.5">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-sky-600"></i>
+                                <span>Añadir temas propios (Máx. 3)</span>
+                            </label>
+                            <span id="custom-topics-count" class="text-[11px] font-semibold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full">0 / 3</span>
+                        </div>
+                        <p class="text-xs text-sky-700">Escribe otros temas especiales que le gusten al estudiante (ej: <i>Dinosaurios, Fútbol femenino, Robótica, Mitología</i>) para que las lecturas se adapten aún más a sus aficiones:</p>
+                        
+                        <div class="flex space-x-2">
+                            <input type="text" id="custom-topic-input" placeholder="Ej: Dinosaurios" maxlength="30" class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+                            <button type="button" onclick="addCustomTopic()" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition flex items-center space-x-1">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                <span>Añadir</span>
+                            </button>
+                        </div>
+
+                        <!-- Lista visual de temas personalizados creados -->
+                        <div id="custom-topics-list" class="flex flex-wrap gap-2 pt-1">
+                            <!-- Chips dinámicos -->
                         </div>
                     </div>
 
@@ -530,7 +555,7 @@
         let profilesList = [];
         let activeProfileId = null;
 
-        // Estructura por defecto para un nuevo perfil
+        // Estructura por defecto para un nuevo perfil (incluye customInterests)
         function createDefaultProfileObject(id, name) {
             return {
                 id: id || ('prof_' + Date.now() + '_' + Math.floor(Math.random()*1000)),
@@ -539,6 +564,7 @@
                     avatar: '🚀',
                     avatarType: 'emoji',
                     interests: [],
+                    customInterests: [], // Hasta 3 temas sugeridos por el alumno
                     level: 1,
                     diagnosticCompleted: false,
                     readingsCompleted: 0,
@@ -700,22 +726,12 @@
                     profilesList = JSON.parse(savedProfiles) || [];
                 }
 
-                // Migración automática si existe un perfil antiguo con la estructura v1
-                if (profilesList.length === 0) {
-                    const oldSingleData = localStorage.getItem('lectoria_student_data');
-                    if (oldSingleData) {
-                        const parsedOld = JSON.parse(oldSingleData);
-                        if (parsedOld && parsedOld.studentState && parsedOld.studentState.name) {
-                            const migratedProfile = {
-                                id: 'prof_migrated_' + Date.now(),
-                                studentState: parsedOld.studentState,
-                                xp: parsedOld.xp || 0,
-                                streak: parsedOld.streak || 0
-                            };
-                            profilesList.push(migratedProfile);
-                        }
+                // Migración o aseguramiento de customInterests en perfiles existentes
+                profilesList.forEach(p => {
+                    if (p.studentState && !Array.isArray(p.studentState.customInterests)) {
+                        p.studentState.customInterests = [];
                     }
-                }
+                });
 
                 if (profilesList.length > 0) {
                     const foundActive = profilesList.find(p => p.id === savedActiveId);
@@ -804,6 +820,7 @@
             currentProfileObj.studentState.avatar = '🚀';
             currentProfileObj.studentState.avatarType = 'emoji';
             currentProfileObj.studentState.interests = [];
+            currentProfileObj.studentState.customInterests = [];
 
             updateAvatarPreviews();
 
@@ -812,6 +829,8 @@
                 btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
             });
 
+            renderCustomTopicsUI();
+
             const resetBtn = document.getElementById('reset-profile-container');
             if (resetBtn) resetBtn.classList.add('hidden');
 
@@ -819,8 +838,76 @@
             playSound('pop');
         }
 
+        // LÓGICA DE TEMAS DE INTERÉS PERSONALIZADOS
+        function addCustomTopic() {
+            const input = document.getElementById('custom-topic-input');
+            if (!input) return;
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            const customs = currentProfileObj.studentState.customInterests;
+
+            if (customs.length >= 3) {
+                showStatusModal('Has alcanzado el límite máximo de 3 temas personalizados.', true);
+                return;
+            }
+
+            if (customs.some(t => t.toLowerCase() === text.toLowerCase())) {
+                showStatusModal('Este tema ya está añadido en tu lista.', true);
+                return;
+            }
+
+            customs.push(text);
+            input.value = '';
+            renderCustomTopicsUI();
+            saveAllProfilesData();
+            playSound('pop');
+        }
+
+        function removeCustomTopic(index) {
+            const customs = currentProfileObj.studentState.customInterests;
+            if (index >= 0 && index < customs.length) {
+                customs.splice(index, 1);
+                renderCustomTopicsUI();
+                saveAllProfilesData();
+                playSound('pop');
+            }
+        }
+
+        function renderCustomTopicsUI() {
+            const container = document.getElementById('custom-topics-list');
+            const countLabel = document.getElementById('custom-topics-count');
+            const customs = currentProfileObj.studentState.customInterests || [];
+
+            if (countLabel) {
+                countLabel.textContent = `${customs.length} / 3`;
+            }
+
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (customs.length === 0) {
+                container.innerHTML = `<span class="text-[11px] text-sky-600/70 italic">No has añadido temas propios aún.</span>`;
+                return;
+            }
+
+            customs.forEach((topic, idx) => {
+                const chip = document.createElement('div');
+                chip.className = 'inline-flex items-center space-x-1.5 bg-white border border-sky-300 text-sky-900 text-xs font-semibold px-2.5 py-1 rounded-xl shadow-xs';
+                chip.innerHTML = `
+                    <span>✨ ${topic}</span>
+                    <button type="button" onclick="removeCustomTopic(${idx})" class="text-sky-400 hover:text-rose-600 transition ml-1 font-bold" title="Eliminar tema">
+                        &times;
+                    </button>
+                `;
+                container.appendChild(chip);
+            });
+        }
+
         function updateAllUiForActiveProfile() {
             const s = currentProfileObj.studentState;
+            if (!Array.isArray(s.customInterests)) s.customInterests = [];
 
             const nameInput = document.getElementById('student-name-input');
             if (nameInput) nameInput.value = s.name || '';
@@ -854,7 +941,7 @@
                 else resetBtn.classList.add('hidden');
             }
 
-            // Actualizar botones de intereses
+            // Actualizar botones de intereses predeterminados
             document.querySelectorAll('.interest-btn').forEach(btn => {
                 const text = btn.textContent;
                 let found = false;
@@ -870,6 +957,8 @@
                     btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
                 }
             });
+
+            renderCustomTopicsUI();
 
             const totalQuestions = s.stats.literalTotal + s.stats.inferentialTotal + s.stats.criticalTotal;
             const totalCorrect = s.stats.literalCorrect + s.stats.inferentialCorrect + s.stats.criticalCorrect;
@@ -1155,7 +1244,14 @@
             if (activeKey) {
                 showStatusModal('Conectando con Gemini IA para redactar una historia a tu medida...', false);
                 const s = currentProfileObj.studentState;
-                const chosenInterests = s.interests.length > 0 ? s.interests.join(', ') : 'Misterio y Ciencia';
+                
+                // Combinar temas predeterminados seleccionados + temas personalizados
+                const allSelectedTopics = [
+                    ...(s.interests || []),
+                    ...(s.customInterests || [])
+                ];
+
+                const chosenInterests = allSelectedTopics.length > 0 ? allSelectedTopics.join(', ') : 'Misterio y Ciencia';
 
                 const levelSpecs = {
                     1: 'Longitud de 120 a 150 palabras. Sintaxis sencilla, oraciones cortas.',
@@ -1164,8 +1260,9 @@
                 };
 
                 const userPrompt = `Crea una micro-lectura inédita e interactiva para un niño de 11 años llamado ${s.name || 'el estudiante'}.
-                Temas preferidos: ${chosenInterests}.
+                Temas preferidos e intereses específicos del niño: ${chosenInterests}.
                 Nivel pedagógico: Nivel ${s.level} (${levelSpecs[s.level] || levelSpecs[1]}).
+                Asegúrate de integrar de forma creativa los temas preferidos e intereses específicos en el argumento de la historia.
                 Asegúrate de envolver 3 o 4 palabras de vocabulario con asteriscos dobles como **ejemplo** en el contenido del texto.
                 Genera también una pregunta literal (con opción correcta 'A', 'B' o 'C'), una pregunta inferencial y una pregunta crítica de opinión.`;
 
