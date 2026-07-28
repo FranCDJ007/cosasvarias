@@ -128,7 +128,7 @@
             </div>
         </div>
 
-        <!-- VISTA 1: CONFIGURACIÓN DE PERFIL INICIAL -->
+        <!-- VISTA 1: CONFIGURACIÓN DE PERFIL INICIAL Y CÓDIGO DE RECUPERACIÓN -->
         <section id="view-profile" class="space-y-6">
             <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 max-w-2xl mx-auto shadow-sm">
                 <div class="text-center space-y-2 mb-6">
@@ -136,7 +136,22 @@
                         <i data-lucide="user-check" class="w-8 h-8"></i>
                     </div>
                     <h2 class="text-2xl font-bold text-slate-900">Perfil del Estudiante</h2>
-                    <p class="text-sm text-slate-600">Configura tus datos para personalizar las lecturas adaptativas.</p>
+                    <p class="text-sm text-slate-600">Configura el perfil de Lector-IA o restaura un perfil guardado.</p>
+                </div>
+
+                <!-- BLOQUE DESTACADO: CARGAR CÓDIGO DE PROGRESO -->
+                <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 mb-6">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i data-lucide="key-round" class="w-4 h-4 text-brand-600"></i>
+                        <h3 class="font-bold text-xs text-brand-900 uppercase tracking-wider">Cargar Progreso con Código</h3>
+                    </div>
+                    <p class="text-xs text-slate-600 mb-3">Si estás usando Google Sites o cambiaste de dispositivo, pega aquí tu código guardado para restaurar todo tu nivel y avance:</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="import-code-input" placeholder="Pega tu código aquí (ej: eyJuYW1l...)" class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+                        <button type="button" onclick="importStudentCode()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">
+                            Cargar
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-5">
@@ -148,10 +163,10 @@
                                 🚀
                             </div>
                             <div class="flex-1">
-                                <p class="text-xs text-slate-600 mb-2">Elige un avatar o sube una imagen propia:</p>
+                                <p class="text-xs text-slate-600 mb-2">Elige un avatar divertido o sube tu propia foto:</p>
                                 <label class="inline-flex items-center space-x-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer transition">
                                     <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                                    <span>Subir foto propia</span>
+                                    <span>Subir imagen propia</span>
                                     <input type="file" id="custom-avatar-input" accept="image/*" class="hidden" onchange="handleCustomAvatarUpload(event)">
                                 </label>
                             </div>
@@ -189,14 +204,14 @@
 
                     <!-- Configuración opcional de Clave API Gemini -->
                     <div class="border-t border-slate-200 pt-4 mt-2">
-                        <details class="group">
+                        <details class="group" open>
                             <summary class="flex justify-between items-center font-bold text-xs text-slate-700 cursor-pointer list-none select-none">
-                                <span>🔑 Clave API Gemini (Opcional - Para IA en vivo)</span>
+                                <span>🔑 Clave API Gemini (Para IA en vivo en web pública)</span>
                                 <span class="transition group-open:rotate-180">▼</span>
                             </summary>
                             <div class="mt-3 space-y-2">
                                 <p class="text-xs text-slate-500">
-                                    Pega tu clave de Google AI Studio si deseas lecturas e IA en vivo. Si se deja en blanco, la app funcionará con el motor local adaptativo.
+                                    Pega tu clave de Google AI Studio. Se guardará al hacer clic en "Guardar Perfil".
                                 </p>
                                 <div class="flex space-x-2">
                                     <input type="password" id="api-key-input" placeholder="AIzaSy..." class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500">
@@ -209,13 +224,26 @@
                         </details>
                     </div>
 
+                    <!-- BLOQUE DE EXPORTACIÓN DEL CÓDIGO DE PROGRESO -->
+                    <div id="export-code-container" class="border-t border-slate-200 pt-4 hidden">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tu Código de Progreso Personal</label>
+                        <p class="text-xs text-slate-500 mb-2">Copia este código y guárdalo. Si entras desde otro navegador o se borra tu sesión, podrás restaurar tu avance exacto:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="export-code-display" readonly class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs font-mono bg-slate-50 text-slate-700 outline-none select-all">
+                            <button type="button" onclick="copyStudentCode()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition flex items-center space-x-1">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                <span>Copiar</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Botón de Guardado e Inicio -->
                     <button onclick="saveProfile()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl shadow-md transition flex items-center justify-center space-x-2 text-sm">
                         <span>Guardar Perfil y Comenzar</span>
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
 
-                    <!-- Reset de Datos del Dispositivo -->
+                    <!-- Reset de Datos -->
                     <div id="reset-profile-container" class="hidden text-center pt-2">
                         <button type="button" onclick="openResetModal()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold underline">
                             Borrar datos guardados de este dispositivo
@@ -638,19 +666,22 @@
         ];
         let currentDiagIndex = 0;
 
-        // PERSISTENCIA EN LOCALSTORAGE (AUTOMÁTICA EN EL DISPOSITIVO)
         function saveStudentData() {
             try {
                 const dataToSave = { studentState: studentState, xp: xp, streak: streak };
                 localStorage.setItem('lectoria_student_data', JSON.stringify(dataToSave));
+                sessionStorage.setItem('lectoria_student_data', JSON.stringify(dataToSave));
+                generateAndDisplayStudentCode();
             } catch (e) {
-                console.warn("Error guardando datos locales:", e);
+                console.warn("Error guardando datos:", e);
             }
         }
 
         function loadStudentData() {
             try {
-                const saved = localStorage.getItem('lectoria_student_data');
+                let saved = localStorage.getItem('lectoria_student_data');
+                if (!saved) saved = sessionStorage.getItem('lectoria_student_data');
+                
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (parsed.studentState) studentState = parsed.studentState;
@@ -659,9 +690,75 @@
                     return true;
                 }
             } catch (e) {
-                console.warn("Error cargando datos locales:", e);
+                console.warn("Error cargando datos:", e);
             }
             return false;
+        }
+
+        function generateAndDisplayStudentCode() {
+            try {
+                const payload = { studentState, xp, streak, apiKey: getApiKey() };
+                const jsonStr = JSON.stringify(payload);
+                const code = btoa(encodeURIComponent(jsonStr));
+                
+                const codeDisplay = document.getElementById('export-code-display');
+                const codeBox = document.getElementById('export-code-container');
+                if (codeDisplay && codeBox) {
+                    codeDisplay.value = code;
+                    codeBox.classList.remove('hidden');
+                }
+            } catch (e) {
+                console.warn("Error generando código:", e);
+            }
+        }
+
+        function copyStudentCode() {
+            const input = document.getElementById('export-code-display');
+            if (!input || !input.value) return;
+
+            input.select();
+            input.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                showStatusModal('✓ ¡Código de progreso copiado al portapapeles! Guárdalo para restaurar tu avance.', false);
+            } catch (err) {
+                showStatusModal('Selecciona el texto del código y cópialo manualmente.', true);
+            }
+        }
+
+        function importStudentCode() {
+            const input = document.getElementById('import-code-input');
+            if (!input) return;
+
+            const code = input.value.trim();
+            if (!code) {
+                showStatusModal('Por favor pega un código de progreso válido.', true);
+                return;
+            }
+
+            try {
+                const jsonStr = decodeURIComponent(atob(code));
+                const parsed = JSON.parse(jsonStr);
+
+                if (parsed.studentState && parsed.studentState.name) {
+                    studentState = parsed.studentState;
+                    if (parsed.xp !== undefined) xp = parsed.xp;
+                    if (parsed.streak !== undefined) streak = parsed.streak;
+                    if (parsed.apiKey) {
+                        localStorage.setItem('lectoria_api_key', parsed.apiKey);
+                        apiKey = parsed.apiKey;
+                    }
+
+                    saveStudentData();
+                    showStatusModal(`¡Progreso restaurado con éxito! Bienvenido de nuevo, ${studentState.name}.`, false);
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    throw new Error('Formato inválido');
+                }
+            } catch (e) {
+                showStatusModal('El código introducido no es válido o está incompleto.', true);
+            }
         }
 
         function openResetModal() {
@@ -677,6 +774,7 @@
             closeResetModal();
             try {
                 localStorage.removeItem('lectoria_student_data');
+                sessionStorage.removeItem('lectoria_student_data');
             } catch (e) {}
             location.reload();
         }
@@ -865,7 +963,8 @@
             const key = getApiKey();
             if (!key) throw new Error('NO_API_KEY');
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+            // Actualizado al endpoint estándar gemini-1.5-flash compatible con claves AQ y AIza
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
             
             const response = await fetch(url, {
                 method: 'POST',
@@ -920,7 +1019,7 @@
                 Asegúrate de envolver 3 o 4 palabras de vocabulario con asteriscos dobles como **ejemplo** en el contenido del texto.
                 Genera también una pregunta literal (con opción correcta 'A', 'B' o 'C'), una pregunta inferencial y una pregunta crítica de opinión.`;
 
-                const systemPrompt = `Eres un Pedagogo Especialista en Lectura Infantil y Escritor de Literatura Juvenil. Genera respuestas strictly en formato JSON válido. Es muy importante que en el texto de la historia encierres exactamente 3 o 4 palabras de vocabulario entre asteriscos dobles (ej: **telemetría**).`;
+                const systemPrompt = `Eres un Pedagogo Especialista en Lectura Infantil y Escritor de Literatura Juvenil. Genera respuestas estrictamente en formato JSON válido. Es muy importante que en el texto de la historia encierres exactamente 3 o 4 palabras de vocabulario entre asteriscos dobles (ej: **telemetría**).`;
 
                 const storySchema = {
                     type: "OBJECT",
@@ -1498,6 +1597,7 @@
                 updateAvatarPreviews();
                 updateAdaptiveEngineState();
                 updateProgressUI();
+                generateAndDisplayStudentCode();
 
                 if (studentState.diagnosticCompleted) {
                     switchView('view-dashboard');
@@ -1512,11 +1612,3 @@
     </script>
 </body>
 </html>
-```eof
-
-### Resumen de cambios realizados:
-
-1. **Interfaz Limpia:** Se eliminaron las secciones de generación, copia e importación de códigos.
-2. **Persistencia Directa en `localStorage`:** Los avances se guardan silenciosa y automáticamente en el navegador de cada dispositivo donde el alumno abra la URL de GitHub Pages.
-3. **Restauración Automática de Sesión:** Al volver a entrar a tu enlace de GitHub Pages (`[https://tu-usuario.github.io/lector-ia/](https://tu-usuario.github.io/lector-ia/)`), la app carga al instante el perfil, avatar, racha, puntos XP y nivel del alumno.
-4. **Opción de Reinicio en Perfil:** Mantiene una opción en la pestaña *Perfil* por si se necesita borrar los datos del dispositivo actual para que lo empiece a utilizar otro estudiante.
