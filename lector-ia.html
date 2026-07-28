@@ -136,22 +136,7 @@
                         <i data-lucide="user-check" class="w-8 h-8"></i>
                     </div>
                     <h2 class="text-2xl font-bold text-slate-900">Perfil del Estudiante</h2>
-                    <p class="text-sm text-slate-600">Configura el perfil de Lector-IA o restaura un perfil guardado.</p>
-                </div>
-
-                <!-- BLOQUE DESTACADO: CARGAR CÓDIGO DE PROGRESO -->
-                <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 mb-6">
-                    <div class="flex items-center space-x-2 mb-2">
-                        <i data-lucide="key-round" class="w-4 h-4 text-brand-600"></i>
-                        <h3 class="font-bold text-xs text-brand-900 uppercase tracking-wider">Cargar Progreso con Código</h3>
-                    </div>
-                    <p class="text-xs text-slate-600 mb-3">Si estás usando Google Sites o cambiaste de dispositivo, pega aquí tu código guardado para restaurar todo tu nivel y avance:</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="import-code-input" placeholder="Pega tu código aquí (ej: eyJuYW1l...)" class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500 bg-white">
-                        <button type="button" onclick="importStudentCode()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">
-                            Cargar
-                        </button>
-                    </div>
+                    <p class="text-sm text-slate-600">Configura los datos del alumno para adaptar las lecturas.</p>
                 </div>
 
                 <div class="space-y-5">
@@ -222,19 +207,6 @@
                                 <p id="api-key-status" class="text-xs text-emerald-600 font-semibold hidden">✓ Clave guardada</p>
                             </div>
                         </details>
-                    </div>
-
-                    <!-- BLOQUE DE EXPORTACIÓN DEL CÓDIGO DE PROGRESO -->
-                    <div id="export-code-container" class="border-t border-slate-200 pt-4 hidden">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tu Código de Progreso Personal</label>
-                        <p class="text-xs text-slate-500 mb-2">Copia este código y guárdalo. Si entras desde otro navegador o se borra tu sesión, podrás restaurar tu avance exacto:</p>
-                        <div class="flex gap-2">
-                            <input type="text" id="export-code-display" readonly class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs font-mono bg-slate-50 text-slate-700 outline-none select-all">
-                            <button type="button" onclick="copyStudentCode()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition flex items-center space-x-1">
-                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                                <span>Copiar</span>
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Botón de Guardado e Inicio -->
@@ -671,7 +643,6 @@
                 const dataToSave = { studentState: studentState, xp: xp, streak: streak };
                 localStorage.setItem('lectoria_student_data', JSON.stringify(dataToSave));
                 sessionStorage.setItem('lectoria_student_data', JSON.stringify(dataToSave));
-                generateAndDisplayStudentCode();
             } catch (e) {
                 console.warn("Error guardando datos:", e);
             }
@@ -693,72 +664,6 @@
                 console.warn("Error cargando datos:", e);
             }
             return false;
-        }
-
-        function generateAndDisplayStudentCode() {
-            try {
-                const payload = { studentState, xp, streak, apiKey: getApiKey() };
-                const jsonStr = JSON.stringify(payload);
-                const code = btoa(encodeURIComponent(jsonStr));
-                
-                const codeDisplay = document.getElementById('export-code-display');
-                const codeBox = document.getElementById('export-code-container');
-                if (codeDisplay && codeBox) {
-                    codeDisplay.value = code;
-                    codeBox.classList.remove('hidden');
-                }
-            } catch (e) {
-                console.warn("Error generando código:", e);
-            }
-        }
-
-        function copyStudentCode() {
-            const input = document.getElementById('export-code-display');
-            if (!input || !input.value) return;
-
-            input.select();
-            input.setSelectionRange(0, 99999);
-
-            try {
-                document.execCommand('copy');
-                showStatusModal('✓ ¡Código de progreso copiado al portapapeles! Guárdalo para restaurar tu avance.', false);
-            } catch (err) {
-                showStatusModal('Selecciona el texto del código y cópialo manualmente.', true);
-            }
-        }
-
-        function importStudentCode() {
-            const input = document.getElementById('import-code-input');
-            if (!input) return;
-
-            const code = input.value.trim();
-            if (!code) {
-                showStatusModal('Por favor pega un código de progreso válido.', true);
-                return;
-            }
-
-            try {
-                const jsonStr = decodeURIComponent(atob(code));
-                const parsed = JSON.parse(jsonStr);
-
-                if (parsed.studentState && parsed.studentState.name) {
-                    studentState = parsed.studentState;
-                    if (parsed.xp !== undefined) xp = parsed.xp;
-                    if (parsed.streak !== undefined) streak = parsed.streak;
-                    if (parsed.apiKey) {
-                        localStorage.setItem('lectoria_api_key', parsed.apiKey);
-                        apiKey = parsed.apiKey;
-                    }
-
-                    saveStudentData();
-                    showStatusModal(`¡Progreso restaurado con éxito! Bienvenido de nuevo, ${studentState.name}.`, false);
-                    setTimeout(() => location.reload(), 1200);
-                } else {
-                    throw new Error('Formato inválido');
-                }
-            } catch (e) {
-                showStatusModal('El código introducido no es válido o está incompleto.', true);
-            }
         }
 
         function openResetModal() {
@@ -1597,7 +1502,6 @@
                 updateAvatarPreviews();
                 updateAdaptiveEngineState();
                 updateProgressUI();
-                generateAndDisplayStudentCode();
 
                 if (studentState.diagnosticCompleted) {
                     switchView('view-dashboard');
