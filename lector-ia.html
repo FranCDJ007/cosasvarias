@@ -83,7 +83,7 @@
                         <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-200">Multiperfil</span>
                     </div>
                     <p class="text-xs text-brand-600 font-medium flex items-center space-x-1" id="profile-name-display">
-                        <span>Configurar perfil</span>
+                        <span>Configura tu perfil</span>
                         <i data-lucide="chevron-down" class="w-3 h-3"></i>
                     </p>
                 </div>
@@ -91,9 +91,9 @@
 
             <!-- Navegación entre pestañas -->
             <nav class="hidden md:flex items-center space-x-1">
-                <button onclick="switchView('view-dashboard')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Misiones</button>
-                <button onclick="switchView('view-progress')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Progreso</button>
-                <button onclick="switchView('view-profile')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Perfil / Alumnos</button>
+                <button onclick="switchView('view-dashboard')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Tus Misiones</button>
+                <button onclick="switchView('view-progress')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Tu Progreso</button>
+                <button onclick="switchView('view-profile')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-brand-600">Tu Perfil / Alumnos</button>
             </nav>
 
             <!-- Indicadores de Gamificación -->
@@ -126,10 +126,10 @@
                     <i data-lucide="alert-triangle" class="w-8 h-8"></i>
                 </div>
                 <h3 class="text-lg font-bold text-slate-900">¿Eliminar este perfil?</h3>
-                <p class="text-xs text-slate-600">Se borrará únicamente la información y los datos conseguidos por este estudiante en este equipo.</p>
+                <p class="text-xs text-slate-600">Se borrará únicamente tu información y los datos que hayas conseguido en este equipo.</p>
                 <div class="flex space-x-3 pt-2">
                     <button onclick="closeResetModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-xs">Cancelar</button>
-                    <button onclick="executeResetData()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-xl text-xs">Sí, eliminar perfil</button>
+                    <button onclick="executeResetData()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-xl text-xs">Sí, eliminar mi perfil</button>
                 </div>
             </div>
         </div>
@@ -141,10 +141,10 @@
                 <!-- SELECCIÓN / LISTADO DE PERFILES REGISTRADOS -->
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Estudiantes en este equipo</label>
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Perfiles en este dispositivo</label>
                         <button onclick="startNewProfileCreation()" class="text-xs text-brand-600 hover:text-brand-700 font-bold flex items-center space-x-1 bg-brand-50 hover:bg-brand-100 px-2.5 py-1 rounded-lg transition">
                             <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-                            <span>+ Nuevo Estudiante</span>
+                            <span>+ Crear Nuevo Perfil</span>
                         </button>
                     </div>
                     <div id="profiles-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -155,20 +155,20 @@
                 <hr class="border-slate-100">
 
                 <div class="text-center space-y-1 mb-4">
-                    <h2 class="text-xl font-bold text-slate-900" id="profile-form-title">Configurar Perfil de Estudiante</h2>
-                    <p class="text-xs text-slate-500">Edita los detalles del perfil activo o crea uno nuevo</p>
+                    <h2 class="text-xl font-bold text-slate-900" id="profile-form-title">Configura tu Perfil</h2>
+                    <p class="text-xs text-slate-500">Edita tus datos o crea un nuevo perfil de estudiante</p>
                 </div>
 
                 <div class="space-y-5">
                     <!-- Selector de Avatar del Estudiante -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Avatar o Foto de Perfil</label>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tu Avatar o Foto de Perfil</label>
                         <div class="flex items-center space-x-4 mb-3">
                             <div id="avatar-preview-box" class="w-16 h-16 rounded-2xl bg-brand-100 border-2 border-brand-500 flex items-center justify-center text-3xl overflow-hidden shadow-sm shrink-0">
                                 🚀
                             </div>
                             <div class="flex-1">
-                                <p class="text-xs text-slate-600 mb-2">Elige un avatar o sube una imagen propia:</p>
+                                <p class="text-xs text-slate-600 mb-2">Elige tu avatar o sube una imagen propia:</p>
                                 <label class="inline-flex items-center space-x-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer transition">
                                     <i data-lucide="upload" class="w-3.5 h-3.5"></i>
                                     <span>Subir foto propia</span>
@@ -190,13 +190,58 @@
 
                     <!-- Nombre del Estudiante -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nombre del Estudiante</label>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tu Nombre</label>
                         <input type="text" id="student-name-input" placeholder="Ej: Lucas" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none">
+                    </div>
+
+                    <!-- NUEVA SECCIÓN: EDAD Y CURSO ESCOLAR -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Selector de Edad -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tu Edad</label>
+                            <select id="student-age-input" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-xs font-medium text-slate-800 bg-white outline-none">
+                                <option value="5 años">5 años</option>
+                                <option value="6 años">6 años</option>
+                                <option value="7 años">7 años</option>
+                                <option value="8 años">8 años</option>
+                                <option value="9 años">9 años</option>
+                                <option value="10 años">10 años</option>
+                                <option value="11 años" selected>11 años</option>
+                                <option value="12 años">12 años</option>
+                                <option value="13 años">13 años</option>
+                                <option value="14 años">14 años</option>
+                                <option value="15 años">15 años</option>
+                                <option value="16 años">16 años</option>
+                                <option value="17 años">17 años</option>
+                                <option value="18 años">18 años</option>
+                                <option value="Más de 18 años">Más de 18 años</option>
+                            </select>
+                        </div>
+
+                        <!-- Selector de Curso o Nivel Académico -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tu Curso o Nivel Académico</label>
+                            <select id="student-grade-input" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-xs font-medium text-slate-800 bg-white outline-none">
+                                <option value="No especificar / Ninguno">No especificar / Ninguno</option>
+                                <option value="1º de E.P.">1º de Educación Primaria (E.P.)</option>
+                                <option value="2º de E.P.">2º de Educación Primaria (E.P.)</option>
+                                <option value="3º de E.P.">3º de Educación Primaria (E.P.)</option>
+                                <option value="4º de E.P.">4º de Educación Primaria (E.P.)</option>
+                                <option value="5º de E.P." selected>5º de Educación Primaria (E.P.)</option>
+                                <option value="6º de E.P.">6º de Educación Primaria (E.P.)</option>
+                                <option value="1º de E.S.O.">1º de E.S.O. (Secundaria)</option>
+                                <option value="2º de E.S.O.">2º de E.S.O. (Secundaria)</option>
+                                <option value="3º de E.S.O.">3º de E.S.O. (Secundaria)</option>
+                                <option value="4º de E.S.O.">4º de E.S.O. (Secundaria)</option>
+                                <option value="1º de Bachillerato">1º de Bachillerato</option>
+                                <option value="2º de Bachillerato">2º de Bachillerato</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Temas de Interés (Predeterminados) -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">¿Qué temas le interesan más? (Elige al menos uno)</label>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">¿Qué temas te interesan más? (Elige al menos uno)</label>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="interests-container">
                             <button type="button" onclick="toggleInterest(this, 'Ciencia y Espacio')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🚀 Ciencia y Espacio</button>
                             <button type="button" onclick="toggleInterest(this, 'Misterio y Detectives')" class="interest-btn p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-brand-500 transition text-center">🔍 Misterio</button>
@@ -207,16 +252,16 @@
                         </div>
                     </div>
 
-                    <!-- NUEVA SECCIÓN: TEMAS PROPIOS SUGERIDOS POR EL ESTUDIANTE (MÁXIMO 3) -->
+                    <!-- TEMAS PROPIOS SUGERIDOS EN SEGUNDA PERSONA -->
                     <div class="bg-sky-50 border border-sky-100 p-4 rounded-xl space-y-3">
                         <div class="flex items-center justify-between">
                             <label class="text-xs font-bold text-sky-900 uppercase tracking-wider flex items-center space-x-1.5">
                                 <i data-lucide="sparkles" class="w-4 h-4 text-sky-600"></i>
-                                <span>Añadir temas propios (Máx. 3)</span>
+                                <span>Añade tus temas propios (Máx. 3)</span>
                             </label>
                             <span id="custom-topics-count" class="text-[11px] font-semibold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full">0 / 3</span>
                         </div>
-                        <p class="text-xs text-sky-700">Escribe otros temas especiales que le gusten al estudiante (ej: <i>Dinosaurios, Fútbol femenino, Robótica, Mitología</i>) para que las lecturas se adapten aún más a sus aficiones:</p>
+                        <p class="text-xs text-sky-700">Escribe otros temas especiales que te gusten (ej: <i>Dinosaurios, Fútbol femenino, Robótica, Mitología</i>) para que las lecturas se adapten aún más a tus aficiones:</p>
                         
                         <div class="flex space-x-2">
                             <input type="text" id="custom-topic-input" placeholder="Ej: Dinosaurios" maxlength="30" class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500 bg-white">
@@ -241,7 +286,7 @@
                             </summary>
                             <div class="mt-3 space-y-2">
                                 <p class="text-xs text-slate-500">
-                                    Pega tu clave de Google AI Studio (formato AQ... o AIzaSy...). Esta clave se comparte entre todos los alumnos de este equipo.
+                                    Pega tu clave de Google AI Studio (formato AQ... o AIzaSy...). Esta clave se comparte entre todos los usuarios de este dispositivo.
                                 </p>
                                 <div class="flex space-x-2">
                                     <input type="password" id="api-key-input" placeholder="AQ... o AIzaSy..." class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-brand-500">
@@ -263,7 +308,7 @@
                     <!-- Borrar Perfil Activo -->
                     <div id="reset-profile-container" class="hidden text-center pt-2">
                         <button type="button" onclick="openResetModal()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold underline">
-                            Eliminar este perfil de este dispositivo
+                            Eliminar tu perfil de este dispositivo
                         </button>
                     </div>
                 </div>
@@ -312,7 +357,7 @@
                     </span>
                     <h2 class="text-2xl font-bold" id="welcome-message">¡Hola! Listo para tu lectura de hoy</h2>
                     <p class="text-xs text-sky-100 max-w-lg leading-relaxed" id="adaptive-level-desc">
-                        Nivel de partida calibrado. El motor IA ajustará la extensión y complejidad de los textos según tu progreso.
+                        Nivel de partida calibrado. El motor IA ajustará la extensión y complejidad de los textos según tu edad, curso y progreso.
                     </p>
                 </div>
                 <button id="btn-generate-ai" onclick="generateAiStory()" class="bg-white text-brand-700 hover:bg-sky-50 font-bold px-5 py-3 rounded-xl shadow transition shrink-0 text-sm flex items-center space-x-2">
@@ -500,7 +545,7 @@
                 <div class="flex items-center justify-between border-b pb-4">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900">Progreso por Dimensiones de Comprensión</h2>
-                        <p class="text-xs text-slate-500">Métricas analíticas basadas en el desempeño continuo de <span id="progress-student-name" class="font-bold text-brand-600">este perfil</span></p>
+                        <p class="text-xs text-slate-500">Métricas analíticas basadas en el desempeño continuo de <span id="progress-student-name" class="font-bold text-brand-600">tu perfil</span></p>
                     </div>
                     <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
                         <i data-lucide="line-chart" class="w-5 h-5"></i>
@@ -555,7 +600,7 @@
         let profilesList = [];
         let activeProfileId = null;
 
-        // Estructura por defecto para un nuevo perfil (incluye customInterests)
+        // Estructura por defecto para un nuevo perfil (incluye edad y curso)
         function createDefaultProfileObject(id, name) {
             return {
                 id: id || ('prof_' + Date.now() + '_' + Math.floor(Math.random()*1000)),
@@ -563,8 +608,10 @@
                     name: name || '',
                     avatar: '🚀',
                     avatarType: 'emoji',
+                    age: '11 años',
+                    grade: '5º de E.P.',
                     interests: [],
-                    customInterests: [], // Hasta 3 temas sugeridos por el alumno
+                    customInterests: [], // Hasta 3 temas sugeridos
                     level: 1,
                     diagnosticCompleted: false,
                     readingsCompleted: 0,
@@ -726,10 +773,12 @@
                     profilesList = JSON.parse(savedProfiles) || [];
                 }
 
-                // Migración o aseguramiento de customInterests en perfiles existentes
+                // Migración o aseguramiento de campos en perfiles existentes
                 profilesList.forEach(p => {
-                    if (p.studentState && !Array.isArray(p.studentState.customInterests)) {
-                        p.studentState.customInterests = [];
+                    if (p.studentState) {
+                        if (!Array.isArray(p.studentState.customInterests)) p.studentState.customInterests = [];
+                        if (!p.studentState.age) p.studentState.age = '11 años';
+                        if (!p.studentState.grade) p.studentState.grade = '5º de E.P.';
                     }
                 });
 
@@ -752,7 +801,7 @@
             container.innerHTML = '';
 
             if (profilesList.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 italic col-span-2">No hay estudiantes registrados. Crea el primero a continuación.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-400 italic col-span-2">No hay estudiantes registrados. Crea tu primer perfil a continuación.</p>`;
                 return;
             }
 
@@ -760,6 +809,8 @@
                 const isActive = profile.id === activeProfileId && !isCreatingNewProfileMode;
                 const s = profile.studentState;
                 const name = s.name || 'Estudiante';
+                const ageText = s.age ? ` • ${s.age}` : '';
+                const gradeText = s.grade && s.grade !== 'No especificar / Ninguno' ? ` • ${s.grade}` : '';
                 const avatar = s.avatarType === 'image' ? `<img src="${s.avatar}" class="w-full h-full object-cover">` : `<span class="text-xl">${s.avatar || '🚀'}</span>`;
 
                 const card = document.createElement('div');
@@ -774,7 +825,7 @@
                         </div>
                         <div class="truncate">
                             <h4 class="font-bold text-xs text-slate-900 truncate">${name}</h4>
-                            <p class="text-[10px] text-slate-500">Nivel ${s.level || 1} • ${profile.xp || 0} XP</p>
+                            <p class="text-[10px] text-slate-500 truncate">Nivel ${s.level || 1}${ageText}${gradeText}</p>
                         </div>
                     </div>
                     ${isActive ? `<span class="text-[10px] bg-brand-500 text-white font-bold px-2 py-0.5 rounded-full shrink-0">Activo</span>` : `<span class="text-[10px] text-slate-400 font-semibold hover:text-brand-600 shrink-0">Elegir</span>`}
@@ -813,6 +864,12 @@
             // Limpiar formulario de perfil
             const nameInput = document.getElementById('student-name-input');
             if (nameInput) nameInput.value = '';
+
+            const ageInput = document.getElementById('student-age-input');
+            if (ageInput) ageInput.value = '11 años';
+
+            const gradeInput = document.getElementById('student-grade-input');
+            if (gradeInput) gradeInput.value = '5º de E.P.';
 
             const formTitle = document.getElementById('profile-form-title');
             if (formTitle) formTitle.textContent = 'Crear Nuevo Perfil de Estudiante';
@@ -908,23 +965,31 @@
         function updateAllUiForActiveProfile() {
             const s = currentProfileObj.studentState;
             if (!Array.isArray(s.customInterests)) s.customInterests = [];
+            if (!s.age) s.age = '11 años';
+            if (!s.grade) s.grade = '5º de E.P.';
 
             const nameInput = document.getElementById('student-name-input');
             if (nameInput) nameInput.value = s.name || '';
+
+            const ageInput = document.getElementById('student-age-input');
+            if (ageInput) ageInput.value = s.age;
+
+            const gradeInput = document.getElementById('student-grade-input');
+            if (gradeInput) gradeInput.value = s.grade;
 
             const formTitle = document.getElementById('profile-form-title');
             if (formTitle) formTitle.textContent = isCreatingNewProfileMode ? 'Crear Nuevo Perfil de Estudiante' : `Editar Perfil de ${s.name || 'Estudiante'}`;
 
             const profileDisplay = document.getElementById('profile-name-display');
             if (profileDisplay) {
-                profileDisplay.innerHTML = `<span>${s.name || 'Configurar perfil'}</span><i data-lucide="chevron-down" class="w-3 h-3"></i>`;
+                profileDisplay.innerHTML = `<span>${s.name || 'Configura tu perfil'}</span><i data-lucide="chevron-down" class="w-3 h-3"></i>`;
             }
 
             const welcomeMsg = document.getElementById('welcome-message');
             if (welcomeMsg) welcomeMsg.textContent = `¡Hola, ${s.name || 'estudiante'}! Listo para tu lectura de hoy`;
 
             const progStudentName = document.getElementById('progress-student-name');
-            if (progStudentName) progStudentName.textContent = s.name || 'este perfil';
+            if (progStudentName) progStudentName.textContent = s.name ? `${s.name}` : 'tu perfil';
 
             const xpCounter = document.getElementById('xp-counter');
             if (xpCounter) xpCounter.textContent = (currentProfileObj.xp || 0) + ' XP';
@@ -1074,12 +1139,20 @@
             const nameInput = document.getElementById('student-name-input');
             const name = nameInput ? nameInput.value.trim() : '';
 
+            const ageInput = document.getElementById('student-age-input');
+            const age = ageInput ? ageInput.value : '11 años';
+
+            const gradeInput = document.getElementById('student-grade-input');
+            const grade = gradeInput ? gradeInput.value : '5º de E.P.';
+
             if (!name) {
-                showStatusModal('Por favor escribe el nombre del estudiante para continuar.', true);
+                showStatusModal('Por favor escribe tu nombre para continuar.', true);
                 return;
             }
 
             currentProfileObj.studentState.name = name;
+            currentProfileObj.studentState.age = age;
+            currentProfileObj.studentState.grade = grade;
             isCreatingNewProfileMode = false;
 
             saveAllProfilesData();
@@ -1254,19 +1327,26 @@
                 const chosenInterests = allSelectedTopics.length > 0 ? allSelectedTopics.join(', ') : 'Misterio y Ciencia';
 
                 const levelSpecs = {
-                    1: 'Longitud de 120 a 150 palabras. Sintaxis sencilla, oraciones cortas.',
-                    2: 'Longitud de 180 a 220 palabras. Sintaxis combinada con causa y efecto.',
-                    3: 'Longitud de 250 a 300 palabras. Sintaxis rica con vocabulario desafiante.'
+                    1: 'Sintaxis sencilla, oraciones cortas y lectura fluida.',
+                    2: 'Sintaxis combinada con relaciones de causa, efecto e inferencias.',
+                    3: 'Sintaxis rica con vocabulario desafiante y razonamiento complejo.'
                 };
 
-                const userPrompt = `Crea una micro-lectura inédita e interactiva para un niño de 11 años llamado ${s.name || 'el estudiante'}.
-                Temas preferidos e intereses específicos del niño: ${chosenInterests}.
-                Nivel pedagógico: Nivel ${s.level} (${levelSpecs[s.level] || levelSpecs[1]}).
-                Asegúrate de integrar de forma creativa los temas preferidos e intereses específicos en el argumento de la historia.
-                Asegúrate de envolver 3 o 4 palabras de vocabulario con asteriscos dobles como **ejemplo** en el contenido del texto.
-                Genera también una pregunta literal (con opción correcta 'A', 'B' o 'C'), una pregunta inferencial y una pregunta crítica de opinión.`;
+                const studentAge = s.age || '11 años';
+                const studentGrade = (s.grade && s.grade !== 'No especificar / Ninguno') ? ` y cursa ${s.grade}` : '';
 
-                const systemPrompt = `Eres un Pedagogo Especialista en Lectura Infantil y Escritor de Literatura Juvenil. Genera respuestas estrictamente en formato JSON válido. Es muy importante que en el texto de la historia encierres exactamente 3 o 4 palabras de vocabulario entre asteriscos dobles (ej: **telemetría**).`;
+                const userPrompt = `Crea una micro-lectura inédita e interactiva dirigida directamente a un estudiante llamado ${s.name || 'Lector'}.
+                El estudiante tiene exactamente ${studentAge}${studentGrade}.
+                Temas preferidos e intereses específicos expresados por el estudiante: ${chosenInterests}.
+                Nivel pedagógico de comprensión lectora: Nivel ${s.level} (${levelSpecs[s.level] || levelSpecs[1]}).
+                
+                REQUISITOS PEDAGÓGICOS DE ADAPTACIÓN:
+                1. Adapta estrictamente el vocabulario, la extensión, la complejidad conceptual y el tono narrativo a su EDAD (${studentAge}) y NIVEL EDUCATIVO (${s.grade || 'Primaria/ESO'}).
+                2. Integra de forma creativa sus temas preferidos e intereses en la trama de la historia.
+                3. Encierra exactamente 3 o 4 palabras de vocabulario clave o desafiante para su edad entre asteriscos dobles (ej: **ejemplo**).
+                4. Genera una pregunta literal (con opción correcta 'A', 'B' o 'C'), una pregunta inferencial y una pregunta crítica de opinión, todas calibradas al nivel madurativo de ${studentAge}.`;
+
+                const systemPrompt = `Eres un Pedagogo Especialista en Lectura y Literatura Adaptativa Infantil y Juvenil. Genera respuestas estrictamente en formato JSON válido. Es fundamental adaptar la dificultad lingüística a la edad (${studentAge}) y curso escolar del alumno, y encerrar exactamente 3 o 4 palabras de vocabulario entre asteriscos dobles.`;
 
                 const storySchema = {
                     type: "OBJECT",
@@ -1448,8 +1528,8 @@
             };
 
             const s = currentProfileObj.studentState;
-            const userPrompt = `Evalúa la respuesta de 11 años (${s.name}). Pregunta: "${currentReadingData.questionCritical.question}". Respuesta: "${studentText}".`;
-            const systemPrompt = `Eres un tutor IA empático para niños de 11 años. Valora la argumentación. Devuelve JSON válido.`;
+            const userPrompt = `Evalúa la respuesta de un estudiante de ${s.age || '11 años'} (${s.name}). Pregunta: "${currentReadingData.questionCritical.question}". Respuesta del estudiante: "${studentText}".`;
+            const systemPrompt = `Eres un tutor IA empático adaptado a la edad del estudiante (${s.age || '11 años'}). Valora la argumentación y responde en 2ª persona. Devuelve JSON válido.`;
 
             const payload = {
                 contents: [{ parts: [{ text: userPrompt }] }],
@@ -1643,9 +1723,9 @@
             const s = currentProfileObj.studentState;
             const lvlMap = { 1: 'Nivel 1: Iniciación', 2: 'Nivel 2: Explorador', 3: 'Nivel 3: Avanzado' };
             const descMap = {
-                1: 'Lecturas breves (120-150 palabras), estructuras sencillas y apoyo directo.',
-                2: 'Lecturas medias (180-220 palabras), inferencias moderadas y vocabulario enriquecido.',
-                3: 'Lecturas avanzadas (250-300 palabras), ideas complejas y razonamiento crítico.'
+                1: 'Lecturas breves, estructuras sencillas y apoyo directo adaptado a tu edad.',
+                2: 'Lecturas medias, inferencias moderadas y vocabulario enriquecido para tu curso.',
+                3: 'Lecturas avanzadas, ideas complejas y razonamiento crítico acorde a tu nivel.'
             };
 
             const tag = document.getElementById('adaptive-level-tag');
