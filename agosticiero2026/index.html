@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨💎 AGOSTICIERO/A del mes 💎✨</title>
+    <title>Clasificación Concurso - Agosto 2026</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -69,19 +69,43 @@
     <header class="sticky top-0 z-30 bg-[#081526]/90 backdrop-blur-md border-b border-cyan-900/50 shadow-xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
             <!-- Brand Logo & Title -->
-            <div class="flex items-center space-x-3 sm:space-x-4">
-                <!-- External Image Logo -->
-                <div class="flex-shrink-0 flex items-center justify-center">
-                    <img src="https://francdj007.github.io/cosasvarias/agosticiero2026/agoslogo.png" 
-                         alt="Logo Agosticiero/a del mes" 
-                         class="h-12 sm:h-16 w-auto object-contain drop-shadow-md rounded-lg"
-                         onerror="this.onerror=null; this.src='https://placehold.co/120x120/0e2238/FACC15?text=Agosticiero';">
+            <div class="flex items-center space-x-3">
+                <!-- SVG Logo inspired by Agosticidios 2026 image -->
+                <div class="flex-shrink-0 bg-sky-400/10 p-2 rounded-2xl border border-sky-400/30 flex items-center justify-center">
+                    <svg class="w-12 h-10 sm:w-16 sm:h-12" viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Sky backdrop -->
+                        <rect width="200" height="130" rx="16" fill="#38BDF8"/>
+                        <!-- Sweat drops / Stars -->
+                        <path d="M165 20 L168 28 L176 28 L170 33 L172 41 L165 36 L158 41 L160 33 L154 28 L162 28 Z" fill="#E05333" stroke="#000" stroke-width="2"/>
+                        <path d="M180 38 L182 43 L187 43 L183 46 L185 51 L180 48 L175 51 L177 46 L173 43 L178 43 Z" fill="#FACC15" stroke="#000" stroke-width="1.5"/>
+                        <!-- Letter G (Turquoise) -->
+                        <g transform="translate(85, 30)">
+                            <path d="M50 35 C50 15, 20 15, 20 35 C20 55, 50 55, 50 40 L35 40 M35 40 L50 40" stroke="#000" stroke-width="7" stroke-linecap="round" fill="#00C4CD"/>
+                            <!-- Dizzy eyes on G -->
+                            <circle cx="28" cy="30" r="3" fill="#000"/>
+                            <circle cx="42" cy="30" r="3" fill="#000"/>
+                            <path d="M28 42 Q35 37 42 42" stroke="#000" stroke-width="2" fill="none"/>
+                        </g>
+                        <!-- Letter A (Coral Orange crashing) -->
+                        <g transform="translate(30, 8) rotate(-12)">
+                            <path d="M10 65 L35 10 L60 65 M20 48 L50 48" stroke="#000" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="#E05333"/>
+                            <!-- Dizzy X eyes on A -->
+                            <path d="M25 28 L33 36 M33 28 L25 36" stroke="#000" stroke-width="3"/>
+                            <path d="M40 28 L48 36 M48 28 L40 36" stroke="#000" stroke-width="3"/>
+                        </g>
+                        <!-- Text AGOSTICIDIOS -->
+                        <text x="100" y="102" font-family="'Fredoka', 'Impact', sans-serif" font-weight="bold" font-size="25" fill="#E05333" stroke="#000" stroke-width="2" text-anchor="middle" letter-spacing="0.5">AGOSTICIDIOS</text>
+                        <!-- Text 2026 -->
+                        <text x="85" y="122" font-family="'Fredoka', 'Impact', sans-serif" font-weight="bold" font-size="16" fill="#FACC15" stroke="#000" stroke-width="1.5" text-anchor="middle">2026</text>
+                        <text x="150" y="121" font-family="sans-serif" font-weight="bold" font-size="9" fill="#000" text-anchor="middle">Summer Edition ★</text>
+                    </svg>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="text-lg sm:text-2xl font-black tracking-tight text-white font-comic">
-                            ✨💎 AGOSTICIERO/A <span class="text-amber-400">del mes</span> 💎✨
+                        <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white font-comic">
+                            AGOSTICIDIOS <span class="text-amber-400">2026</span>
                         </h1>
+                        <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">Summer Edition ★</span>
                     </div>
                     <p class="text-xs text-cyan-300/80 flex items-center gap-1.5 mt-0.5">
                         <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
@@ -92,6 +116,9 @@
 
             <!-- Header Actions -->
             <div class="flex items-center gap-2.5">
+                <button onclick="toggleBasesModal(true)" class="px-4 py-2 text-xs font-bold rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-scroll text-amber-400"></i> Bases
+                </button>
                 <button id="btn-refresh" onclick="fetchSheetData()" class="px-4 py-2 text-xs font-bold rounded-xl bg-cyan-900/40 hover:bg-cyan-800/60 text-cyan-200 border border-cyan-500/30 transition shadow-sm flex items-center gap-2">
                     <i id="refresh-icon" class="fa-solid fa-rotate text-cyan-400"></i> Actualizar
                 </button>
@@ -102,14 +129,14 @@
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
         <!-- Top Overview Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="bg-[#0e2238] border border-orange-500/30 rounded-2xl p-4 flex items-center space-x-4 shadow-md">
                 <div class="p-3 bg-orange-500/15 text-orange-400 rounded-xl border border-orange-500/20">
                     <i class="fa-solid fa-crown text-xl"></i>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-slate-400">Líder General</p>
-                    <p id="stat-leader" class="text-base font-bold text-slate-100 truncate max-w-[120px] sm:max-w-[150px]">Cargando...</p>
+                    <p id="stat-leader" class="text-base font-bold text-slate-100 truncate max-w-[180px] sm:max-w-[220px]">Cargando...</p>
                     <p id="stat-leader-pts" class="text-xs text-orange-400 font-bold">0 pts</p>
                 </div>
             </div>
@@ -122,28 +149,6 @@
                     <p class="text-xs font-medium text-slate-400">Participantes</p>
                     <p id="stat-participants-count" class="text-xl font-bold text-slate-100">0</p>
                     <p class="text-xs text-cyan-300/60">En competición</p>
-                </div>
-            </div>
-
-            <div class="bg-[#0e2238] border border-amber-500/30 rounded-2xl p-4 flex items-center space-x-4 shadow-md">
-                <div class="p-3 bg-amber-500/15 text-amber-400 rounded-xl border border-amber-500/20">
-                    <i class="fa-solid fa-calendar-day text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-slate-400">Día Seleccionado</p>
-                    <p id="stat-selected-day-label" class="text-base font-bold text-amber-300">Día 1 Ago</p>
-                    <p id="stat-selected-day-leader" class="text-xs text-slate-400 truncate max-w-[120px]">Mejor: -</p>
-                </div>
-            </div>
-
-            <div class="bg-[#0e2238] border border-emerald-500/30 rounded-2xl p-4 flex items-center space-x-4 shadow-md">
-                <div class="p-3 bg-emerald-500/15 text-emerald-400 rounded-xl border border-emerald-500/20">
-                    <i class="fa-solid fa-chart-line text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-slate-400">Promedio General</p>
-                    <p id="stat-avg-score" class="text-xl font-bold text-slate-100">0</p>
-                    <p class="text-xs text-emerald-400 font-semibold">puntos / persona</p>
                 </div>
             </div>
         </div>
@@ -207,25 +212,27 @@
             <!-- RIGHT COLUMN: Calendar & Daily Leaderboard (5 cols) -->
             <div class="lg:col-span-5 xl:col-span-4 space-y-6">
 
-                <!-- Calendar Card for August 2026 -->
-                <div class="bg-[#0e2238] border border-cyan-900/60 rounded-2xl p-5 shadow-lg">
+                <!-- Calendar Card for August 2026 (Distinct Light Summer Theme) -->
+                <div class="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 border-2 border-amber-400 rounded-2xl p-5 shadow-xl shadow-amber-500/10 relative overflow-hidden ring-2 ring-amber-300/50 text-slate-900">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-orange-500/15 text-orange-400 rounded-lg border border-orange-500/20">
-                                <i class="fa-regular fa-calendar-days"></i>
+                            <div class="p-2 bg-amber-500/20 text-amber-800 rounded-lg border border-amber-400/40">
+                                <i class="fa-regular fa-calendar-days text-amber-700"></i>
                             </div>
                             <div>
-                                <h2 class="text-base font-bold text-white font-comic">Agosto 2026</h2>
-                                <p class="text-xs text-slate-400">Pincha un día para consultar su tabla</p>
+                                <h2 class="text-base font-bold text-slate-900 font-comic flex items-center gap-1.5">
+                                    Agosto 2026 <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 border border-amber-300 font-sans font-semibold">Diario</span>
+                                </h2>
+                                <p class="text-xs text-slate-600 font-medium">Pincha un día para consultar su tabla</p>
                             </div>
                         </div>
-                        <button onclick="selectToday()" class="text-[11px] font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30 transition">
+                        <button onclick="selectToday()" class="text-[11px] font-bold text-white bg-orange-500 hover:bg-orange-600 px-3 py-1.5 rounded-lg transition shadow-md">
                             Hoy
                         </button>
                     </div>
 
                     <!-- Days of Week Header -->
-                    <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-cyan-400/70 mb-2">
+                    <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-600 mb-2">
                         <span>L</span>
                         <span>M</span>
                         <span>X</span>
@@ -240,22 +247,22 @@
                         <!-- Populated dynamic days -->
                     </div>
 
-                    <div class="mt-4 pt-3 border-t border-cyan-900/60 flex items-center justify-between text-[11px] text-slate-400">
+                    <div class="mt-4 pt-3 border-t border-amber-200 flex items-center justify-between text-[11px] text-slate-600 font-medium">
                         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block"></span> Seleccionado</span>
-                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span> Con registros</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-600 inline-block"></span> Con registros</span>
                     </div>
                 </div>
 
-                <!-- Secondary Leaderboard: Daily Ranking -->
-                <div class="bg-[#0e2238] border border-cyan-900/60 rounded-2xl p-5 shadow-lg">
-                    <div class="flex items-center justify-between mb-3 border-b border-cyan-900/60 pb-3">
+                <!-- Secondary Leaderboard: Daily Ranking (Distinct Light Summer Theme) -->
+                <div class="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 border-2 border-amber-400 rounded-2xl p-5 shadow-xl shadow-amber-500/10 relative overflow-hidden ring-2 ring-amber-300/50 text-slate-900">
+                    <div class="flex items-center justify-between mb-3 border-b border-amber-200 pb-3">
                         <div>
-                            <h3 class="text-base font-bold text-white flex items-center gap-2 font-comic">
-                                <i class="fa-solid fa-ranking-star text-amber-400"></i> Clasificación Diaria
+                            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 font-comic">
+                                <i class="fa-solid fa-ranking-star text-orange-600"></i> Clasificación Diaria
                             </h3>
-                            <p id="daily-card-subtitle" class="text-xs text-slate-400">Puntos del Día <span id="daily-card-day-num" class="text-amber-300 font-bold">1</span> de Agosto</p>
+                            <p id="daily-card-subtitle" class="text-xs text-slate-600 font-medium">Puntos del Día <span id="daily-card-day-num" class="text-orange-600 font-bold">1</span> de Agosto</p>
                         </div>
-                        <span id="daily-total-sum" class="text-xs font-semibold px-2.5 py-1 bg-cyan-500/10 text-cyan-300 rounded-full border border-cyan-500/20">0 pts repartidos</span>
+                        <span id="daily-total-sum" class="text-xs font-bold px-2.5 py-1 bg-amber-200/80 text-amber-950 rounded-full border border-amber-300">0 pts repartidos</span>
                     </div>
 
                     <div id="daily-leaderboard-list" class="space-y-2 max-h-[380px] overflow-y-auto custom-scrollbar pr-1">
@@ -268,6 +275,58 @@
         </div>
 
     </main>
+
+    <!-- MODAL: Bases del Concurso -->
+    <div id="modal-bases" class="fixed inset-0 z-50 bg-[#081526]/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-[#0e2238] border border-amber-500/40 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="toggleBasesModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg bg-cyan-950 hover:bg-cyan-900 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="flex items-center space-x-3 border-b border-cyan-900/60 pb-3">
+                <div class="p-3 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30 text-xl">
+                    <i class="fa-solid fa-scroll"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white font-comic">BASES DEL CONCURSO</h3>
+                    <p class="text-xs text-amber-400 font-semibold">✨💎 AGOSTICIERO/A del mes 💎✨</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-sm text-slate-200 leading-relaxed font-sans">
+                <div class="flex gap-3 items-start p-3 bg-[#081526] rounded-xl border border-cyan-900/50">
+                    <span class="text-base select-none">1️⃣</span>
+                    <p>Podrá participar libremente cualquier miembro (o miembra) del <strong>C.O.M.E.M.E.L.A.</strong></p>
+                </div>
+                <div class="flex gap-3 items-start p-3 bg-[#081526] rounded-xl border border-cyan-900/50">
+                    <span class="text-base select-none">2️⃣</span>
+                    <p>En algún momento de cada día se publicará el agosticidio del día en formato <em>“adivinanza”</em> (o similar).</p>
+                </div>
+                <div class="flex gap-3 items-start p-3 bg-[#081526] rounded-xl border border-cyan-900/50">
+                    <span class="text-base select-none">3️⃣</span>
+                    <p>La respuesta se dará <strong>SIEMPRE</strong> citando al mensaje en el que se ha publicado el agosticidio.</p>
+                </div>
+                <div class="flex gap-3 items-start p-3 bg-[#081526] rounded-xl border border-cyan-900/50">
+                    <span class="text-base select-none">4️⃣</span>
+                    <p>En algún otro momento del día se dará la solución al agosticidio de ese día: hasta ese momento quien haya dado la respuesta correcta en primer lugar recibirá <strong>10 puntos</strong>, 9 puntos al segundo, 8 al tercero, y así sucesivamente.</p>
+                </div>
+                <div class="flex gap-3 items-start p-3 bg-[#081526] rounded-xl border border-cyan-900/50">
+                    <span class="text-base select-none">5️⃣</span>
+                    <p>La clasificación se hará sumando los puntos conseguidos por cada persona a lo largo del mes.</p>
+                </div>
+                <div class="flex gap-3 items-start p-3 bg-[#081526] rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent">
+                    <span class="text-base select-none">6️⃣</span>
+                    <p>La persona que más puntos acumule tendrá el privilegio de ostentar el título de <strong>✨💎 AGOSTICIERO/A del mes 💎✨</strong> durante un año 🤪 … También ganará el derecho de tatuarse una ⭐ en el pecho a modo de reconocimiento <del class="line-through decoration-amber-400 opacity-75">púbico púdico</del> público y social.</p>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-cyan-900/60 flex justify-end">
+                <button onclick="toggleBasesModal(false)" class="px-5 py-2 text-xs font-bold rounded-xl bg-amber-500 text-slate-950 hover:bg-amber-400 transition shadow-md">
+                    ¡Entendido!
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL: Participant Detail View -->
     <div id="modal-participant" class="fixed inset-0 z-50 bg-[#081526]/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -465,31 +524,21 @@
             if (contestData.length === 0) return;
 
             const leader = contestData[0];
-            document.getElementById('stat-leader').textContent = leader ? leader.name : '-';
-            document.getElementById('stat-leader-pts').textContent = leader ? `${leader.total.toLocaleString()} pts` : '0 pts';
-            document.getElementById('stat-participants-count').textContent = contestData.length;
+            const leaderEl = document.getElementById('stat-leader');
+            const leaderPtsEl = document.getElementById('stat-leader-pts');
+            const participantsEl = document.getElementById('stat-participants-count');
 
-            // Selected Day Leader
-            document.getElementById('stat-selected-day-label').textContent = `Día ${selectedDay} Ago`;
-            const dayIdx = selectedDay - 1;
-            let dayLeader = contestData[0];
-            let maxDayPts = -1;
+            if (leaderEl) leaderEl.textContent = leader ? leader.name : '-';
+            if (leaderPtsEl) leaderPtsEl.textContent = leader ? `${leader.total.toLocaleString()} pts` : '0 pts';
+            if (participantsEl) participantsEl.textContent = contestData.length;
+        }
 
-            contestData.forEach(p => {
-                if (p.daily[dayIdx] > maxDayPts) {
-                    maxDayPts = p.daily[dayIdx];
-                    dayLeader = p;
-                }
-            });
-
-            document.getElementById('stat-selected-day-leader').textContent = maxDayPts >= 0 && dayLeader 
-                ? `Mejor: ${dayLeader.name} (${maxDayPts}p)` 
-                : 'Sin registros';
-
-            // Overall Average Score
-            const sumTotals = contestData.reduce((acc, p) => acc + p.total, 0);
-            const avg = contestData.length > 0 ? Math.round(sumTotals / contestData.length) : 0;
-            document.getElementById('stat-avg-score').textContent = avg.toLocaleString();
+        function toggleBasesModal(show) {
+            const modal = document.getElementById('modal-bases');
+            if (modal) {
+                if (show) modal.classList.remove('hidden');
+                else modal.classList.add('hidden');
+            }
         }
 
         // --- Render Top 3 Podium ---
@@ -635,7 +684,7 @@
             let html = '';
 
             for (let i = 0; i < startPadding; i++) {
-                html += `<div class="h-9 rounded-lg bg-[#081526]/40"></div>`;
+                html += `<div class="h-9 rounded-lg bg-amber-100/50"></div>`;
             }
 
             for (let day = 1; day <= totalDays; day++) {
@@ -645,17 +694,17 @@
                 let btnClasses = 'h-9 text-xs font-bold rounded-lg flex flex-col items-center justify-center transition relative ';
 
                 if (isSelected) {
-                    btnClasses += 'bg-orange-500 text-white ring-2 ring-orange-300 shadow-md shadow-orange-500/30 z-10';
+                    btnClasses += 'bg-orange-500 text-white font-black ring-2 ring-orange-400 shadow-md scale-105 z-10';
                 } else if (hasData) {
-                    btnClasses += 'bg-[#081526] hover:bg-cyan-900/60 text-slate-200 border border-cyan-500/40';
+                    btnClasses += 'bg-white hover:bg-amber-100 text-slate-900 border border-amber-300 shadow-sm';
                 } else {
-                    btnClasses += 'bg-[#081526]/50 hover:bg-[#081526] text-slate-500 border border-cyan-950';
+                    btnClasses += 'bg-white/60 hover:bg-white text-slate-500 border border-amber-200/70';
                 }
 
                 html += `
                 <button onclick="selectCalendarDay(${day})" class="${btnClasses}">
                     <span>${day}</span>
-                    ${hasData && !isSelected ? `<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 absolute bottom-1"></span>` : ''}
+                    ${hasData && !isSelected ? `<span class="w-1.5 h-1.5 rounded-full bg-cyan-600 absolute bottom-1"></span>` : ''}
                 </button>`;
             }
 
@@ -697,8 +746,8 @@
 
             if (totalDayPts === 0) {
                 list.innerHTML = `
-                <div class="text-center py-8 text-slate-500 text-xs bg-slate-950/40 rounded-xl border border-slate-800/80 p-4">
-                    <i class="fa-regular fa-calendar-xmark text-2xl text-slate-600 mb-2 block"></i>
+                <div class="text-center py-8 text-slate-600 text-xs bg-white/80 rounded-xl border border-amber-200/80 p-4">
+                    <i class="fa-regular fa-calendar-xmark text-2xl text-amber-500 mb-2 block"></i>
                     Aún no hay puntos registrados para el día ${selectedDay} de agosto.
                 </div>`;
                 return;
@@ -708,21 +757,21 @@
                 const pts = p.daily[dayIdx] || 0;
                 if (pts === 0 && rank > 4) return ''; // Hide 0-pt players beyond top 5 to keep view clean
 
-                let rankStyle = 'text-slate-400 font-bold';
-                if (rank === 0) rankStyle = 'text-amber-400 font-black';
-                else if (rank === 1) rankStyle = 'text-slate-300 font-bold';
-                else if (rank === 2) rankStyle = 'text-amber-600 font-bold';
+                let rankStyle = 'text-slate-500 font-bold';
+                if (rank === 0) rankStyle = 'text-orange-600 font-black';
+                else if (rank === 1) rankStyle = 'text-slate-700 font-bold';
+                else if (rank === 2) rankStyle = 'text-amber-700 font-bold';
 
                 return `
-                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition">
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-amber-200/80 shadow-sm hover:border-orange-400 transition">
                     <div class="flex items-center space-x-3">
                         <span class="w-5 text-center text-xs ${rankStyle}">#${rank + 1}</span>
-                        <div class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-300">
+                        <div class="w-7 h-7 rounded-lg bg-orange-100 border border-orange-200 flex items-center justify-center text-xs font-bold text-orange-800">
                             ${getInitials(p.name)}
                         </div>
-                        <span class="text-xs font-medium text-slate-200 truncate max-w-[130px] sm:max-w-[160px]">${p.name}</span>
+                        <span class="text-xs font-bold text-slate-900 truncate max-w-[130px] sm:max-w-[160px]">${p.name}</span>
                     </div>
-                    <div class="text-xs font-bold ${pts > 0 ? 'text-indigo-300' : 'text-slate-500'}">
+                    <div class="text-xs font-extrabold ${pts > 0 ? 'text-orange-600' : 'text-slate-400'}">
                         +${pts} pts
                     </div>
                 </div>`;
